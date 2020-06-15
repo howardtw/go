@@ -31,7 +31,6 @@ type Options struct {
 	FirebaseProjectID string
 
 	KMSMasterKeyURI            string
-	ServiceKeyPublic           string
 	ServiceKeyPrivate          string
 	EncryptedServiceKeyPrivate string
 

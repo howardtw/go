@@ -96,14 +96,6 @@ func (c *ServeCommand) Command() *cobra.Command {
 			Required:    false,
 		},
 		{
-			Name:        "service-key-public",
-			Usage:       "Public key of the asymmetric service key",
-			OptType:     types.String,
-			ConfigKey:   &opts.ServiceKeyPublic,
-			FlagDefault: "",
-			Required:    true,
-		},
-		{
 			Name:        "service-key-private",
 			Usage:       "Unencrypted private key of the asymmetric service key",
 			OptType:     types.String,
