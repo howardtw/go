@@ -87,6 +87,38 @@ func (c *ServeCommand) Command() *cobra.Command {
 			FlagDefault: "recoverysigner",
 			Required:    false,
 		},
+		{
+			Name:        "kms-master-key-uri",
+			Usage:       `Key Management Service (KMS) Key URI. The prefix for AWS KMS is "aws-kms://", and the prefix for Google Cloud KMS is "gcp-kms://"`,
+			OptType:     types.String,
+			ConfigKey:   &opts.KMSMasterKeyURI,
+			FlagDefault: "",
+			Required:    false,
+		},
+		{
+			Name:        "service-key-public",
+			Usage:       "Public key of the asymmetric service key",
+			OptType:     types.String,
+			ConfigKey:   &opts.ServiceKeyPublic,
+			FlagDefault: "",
+			Required:    true,
+		},
+		{
+			Name:        "service-key-private",
+			Usage:       "Unencrypted private key of the asymmetric service key",
+			OptType:     types.String,
+			ConfigKey:   &opts.ServiceKeyPrivate,
+			FlagDefault: "",
+			Required:    false,
+		},
+		{
+			Name:        "encrypted-service-key-private",
+			Usage:       "Encrypted private key of the asymmetric service key",
+			OptType:     types.String,
+			ConfigKey:   &opts.EncryptedServiceKeyPrivate,
+			FlagDefault: "",
+			Required:    false,
+		},
 	}
 	cmd := &cobra.Command{
 		Use:   "serve",

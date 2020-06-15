@@ -30,6 +30,11 @@ type Options struct {
 	SEP10JWTIssuer    string
 	FirebaseProjectID string
 
+	KMSMasterKeyURI            string
+	ServiceKeyPublic           string
+	ServiceKeyPrivate          string
+	EncryptedServiceKeyPrivate string
+
 	AdminPort        int
 	MetricsNamespace string
 }
