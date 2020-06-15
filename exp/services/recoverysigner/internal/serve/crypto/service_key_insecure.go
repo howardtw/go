@@ -10,12 +10,12 @@ import (
 	"github.com/stellar/go/support/errors"
 )
 
-type InsecureServiceKeySet struct {
+type InsecureServiceKey struct {
 	hybridEncrypt tink.HybridEncrypt
 	hybridDecrypt tink.HybridDecrypt
 }
 
-func newInsecureServiceKeySet(privateKey []byte) (*InsecureServiceKeySet, error) {
+func newInsecureServiceKey(privateKey []byte) (*InsecureServiceKey, error) {
 	if len(privateKey) == 0 {
 		return nil, errors.New("SERVICE_KEY_PRIVATE is empty")
 	}
@@ -40,16 +40,16 @@ func newInsecureServiceKeySet(privateKey []byte) (*InsecureServiceKeySet, error)
 		return nil, errors.Wrap(err, "getting hybrid encryption primitive")
 	}
 
-	return &InsecureServiceKeySet{
+	return &InsecureServiceKey{
 		hybridEncrypt: he,
 		hybridDecrypt: hd,
 	}, nil
 }
 
-func (ks *InsecureServiceKeySet) Encrypt(plaintext, contextInfo []byte) ([]byte, error) {
+func (ks *InsecureServiceKey) Encrypt(plaintext, contextInfo []byte) ([]byte, error) {
 	return ks.hybridEncrypt.Encrypt(plaintext, contextInfo)
 }
 
-func (ks *InsecureServiceKeySet) Decrypt(plaintext, contextInfo []byte) ([]byte, error) {
+func (ks *InsecureServiceKey) Decrypt(plaintext, contextInfo []byte) ([]byte, error) {
 	return ks.hybridDecrypt.Decrypt(plaintext, contextInfo)
 }

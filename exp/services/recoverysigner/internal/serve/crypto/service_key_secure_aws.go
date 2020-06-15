@@ -13,7 +13,7 @@ import (
 	"github.com/stellar/go/support/errors"
 )
 
-type SecureServiceKeySet struct {
+type SecureServiceKey struct {
 	remote        tink.AEAD
 	keyset        *tinkpb.EncryptedKeyset
 	hybridEncrypt tink.HybridEncrypt
@@ -21,7 +21,7 @@ type SecureServiceKeySet struct {
 
 // masterKeyURI must have the following format: 'arn:<partition>:kms:<region>:[:path]'.
 // See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
-func newSecureServiceKeySetWithAWS(masterKeyURI string, encryptedPrivateKey []byte) (*SecureServiceKeySet, error) {
+func newSecureServiceKeyWithAWS(masterKeyURI string, encryptedPrivateKey []byte) (*SecureServiceKey, error) {
 	if len(encryptedPrivateKey) == 0 {
 		return nil, errors.New("ENCRYPTED_SERVICE_KEY_PRIVATE is empty")
 	}
@@ -67,18 +67,18 @@ func newSecureServiceKeySetWithAWS(masterKeyURI string, encryptedPrivateKey []by
 		return nil, errors.Wrap(err, "getting hybrid encryption primitive")
 	}
 
-	return &SecureServiceKeySet{
+	return &SecureServiceKey{
 		remote:        aead,
 		keyset:        memKeyset.EncryptedKeyset,
 		hybridEncrypt: he,
 	}, nil
 }
 
-func (ks *SecureServiceKeySet) Encrypt(plaintext, contextInfo []byte) ([]byte, error) {
+func (ks *SecureServiceKey) Encrypt(plaintext, contextInfo []byte) ([]byte, error) {
 	return ks.hybridEncrypt.Encrypt(plaintext, contextInfo)
 }
 
-func (ks *SecureServiceKeySet) Decrypt(plaintext, contextInfo []byte) ([]byte, error) {
+func (ks *SecureServiceKey) Decrypt(plaintext, contextInfo []byte) ([]byte, error) {
 	khPriv, err := keyset.Read(&keyset.MemReaderWriter{EncryptedKeyset: ks.keyset}, ks.remote)
 	if err != nil {
 		return nil, errors.Wrap(err, "decrypting private key keyset")

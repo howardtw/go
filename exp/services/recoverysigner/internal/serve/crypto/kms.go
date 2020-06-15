@@ -20,12 +20,12 @@ func NewKMS(masterKeyURI, encryptedServiceKeyPrivate, serviceKeyPrivate string) 
 
 		switch prefix {
 		case awsPrefix:
-			return newSecureServiceKeySetWithAWS(masterKeyURI, []byte(encryptedServiceKeyPrivate))
+			return newSecureServiceKeyWithAWS(masterKeyURI, []byte(encryptedServiceKeyPrivate))
 
 		default:
 			return nil, errors.New("KMS_MASTER_KEY_URI does not start with a valid prefix (aws-kms)")
 		}
 	}
 
-	return newInsecureServiceKeySet([]byte(serviceKeyPrivate))
+	return newInsecureServiceKey([]byte(serviceKeyPrivate))
 }
