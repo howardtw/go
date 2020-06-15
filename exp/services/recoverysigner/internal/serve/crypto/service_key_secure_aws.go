@@ -23,7 +23,7 @@ type SecureServiceKey struct {
 	hybridEncrypt tink.HybridEncrypt
 }
 
-// masterKeyURI must have the following format: 'arn:<partition>:kms:<region>:[:path]'.
+// masterKeyURI must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
 // See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
 func newSecureServiceKeyWithAWS(masterKeyURI string, encryptedPrivateKey []byte) (*SecureServiceKey, error) {
 	if len(encryptedPrivateKey) == 0 {
