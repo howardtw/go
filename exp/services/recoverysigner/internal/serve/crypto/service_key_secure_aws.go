@@ -13,6 +13,10 @@ import (
 	"github.com/stellar/go/support/errors"
 )
 
+var _ tink.AEAD = (*SecureServiceKey)(nil)
+var _ tink.HybridEncrypt = (*SecureServiceKey)(nil)
+var _ tink.HybridDecrypt = (*SecureServiceKey)(nil)
+
 type SecureServiceKey struct {
 	remote        tink.AEAD
 	keyset        *tinkpb.EncryptedKeyset

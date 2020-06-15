@@ -10,6 +10,10 @@ import (
 	"github.com/stellar/go/support/errors"
 )
 
+var _ tink.AEAD = (*InsecureServiceKey)(nil)
+var _ tink.HybridEncrypt = (*InsecureServiceKey)(nil)
+var _ tink.HybridDecrypt = (*InsecureServiceKey)(nil)
+
 type InsecureServiceKey struct {
 	hybridEncrypt tink.HybridEncrypt
 	hybridDecrypt tink.HybridDecrypt
