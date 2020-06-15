@@ -10,6 +10,7 @@ import (
 	"github.com/google/tink/go/keyset"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 	"github.com/google/tink/go/tink"
+	"github.com/stellar/go/support/errors"
 )
 
 type SecureServiceKeySet struct {
@@ -20,27 +21,31 @@ type SecureServiceKeySet struct {
 
 // masterKeyURI must have the following format: 'arn:<partition>:kms:<region>:[:path]'.
 // See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
-func NewSecureServiceKeySetWithAWS(masterKeyURI string, encryptedPrivateKey []byte) (*SecureServiceKeySet, error) {
+func newSecureServiceKeySetWithAWS(masterKeyURI string, encryptedPrivateKey []byte) (*SecureServiceKeySet, error) {
+	if len(encryptedPrivateKey) == 0 {
+		return nil, errors.New("ENCRYPTED_SERVICE_KEY_PRIVATE is empty")
+	}
+
 	client, err := awskms.NewClient(masterKeyURI)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "initializing AWS KMS client")
 	}
 
 	registry.RegisterKMSClient(client)
 
 	aead, err := client.GetAEAD(masterKeyURI)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "getting AEAD primitive from AWS KMS")
 	}
 
 	ksPriv, err := aead.Decrypt(encryptedPrivateKey, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "decrypting private key")
 	}
 
 	khPriv, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(bytes.NewReader(ksPriv)))
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "getting key handle for private key")
 	}
 
 	// remove the decrypted private key from memory
@@ -49,17 +54,17 @@ func NewSecureServiceKeySetWithAWS(masterKeyURI string, encryptedPrivateKey []by
 	memKeyset := &keyset.MemReaderWriter{}
 	err = khPriv.Write(memKeyset, aead)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "encrypting private key keyset")
 	}
 
 	khPub, err := khPriv.Public()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "getting key handle for public key")
 	}
 
 	he, err := hybrid.NewHybridEncrypt(khPub)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "getting hybrid encryption primitive")
 	}
 
 	return &SecureServiceKeySet{
@@ -76,12 +81,12 @@ func (ks *SecureServiceKeySet) Encrypt(plaintext, contextInfo []byte) ([]byte, e
 func (ks *SecureServiceKeySet) Decrypt(plaintext, contextInfo []byte) ([]byte, error) {
 	khPriv, err := keyset.Read(&keyset.MemReaderWriter{EncryptedKeyset: ks.keyset}, ks.remote)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "decrypting private key keyset")
 	}
 
 	hd, err := hybrid.NewHybridDecrypt(khPriv)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "getting hybrid decryption primitive")
 	}
 
 	return hd.Decrypt(plaintext, contextInfo)

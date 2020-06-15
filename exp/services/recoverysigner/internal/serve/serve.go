@@ -12,6 +12,7 @@ import (
 	"github.com/stellar/go/exp/services/recoverysigner/internal/account"
 	"github.com/stellar/go/exp/services/recoverysigner/internal/db"
 	"github.com/stellar/go/exp/services/recoverysigner/internal/serve/auth"
+	"github.com/stellar/go/exp/services/recoverysigner/internal/serve/crypto"
 	"github.com/stellar/go/keypair"
 	"github.com/stellar/go/support/errors"
 	supporthttp "github.com/stellar/go/support/http"
@@ -70,6 +71,7 @@ type handlerDeps struct {
 	NetworkPassphrase  string
 	SigningKeys        []*keypair.Full
 	SigningAddresses   []*keypair.FromAddress
+	KMS                crypto.KMS
 	AccountStore       account.Store
 	SEP10JWKS          jose.JSONWebKeySet
 	SEP10JWTIssuer     string
@@ -102,6 +104,11 @@ func getHandlerDeps(opts Options) (handlerDeps, error) {
 		return handlerDeps{}, errors.New("no keys included in SEP-10 JSON Web Key (JWK) Set")
 	}
 	opts.Logger.Infof("SEP10 JWKS contains %d keys", len(sep10JWKS.Keys))
+
+	kms, err := crypto.NewKMS(opts.KMSMasterKeyURI, opts.EncryptedServiceKeyPrivate, opts.ServiceKeyPrivate)
+	if err != nil {
+		return handlerDeps{}, errors.Wrap(err, "error initializing KMS")
+	}
 
 	db, err := db.Open(opts.DatabaseURL)
 	if err != nil {
@@ -147,6 +154,7 @@ func getHandlerDeps(opts Options) (handlerDeps, error) {
 		NetworkPassphrase:  opts.NetworkPassphrase,
 		SigningKeys:        signingKeys,
 		SigningAddresses:   signingAddresses,
+		KMS:                kms,
 		AccountStore:       accountStore,
 		SEP10JWKS:          sep10JWKS,
 		SEP10JWTIssuer:     opts.SEP10JWTIssuer,
