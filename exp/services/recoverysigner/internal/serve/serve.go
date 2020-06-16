@@ -31,9 +31,8 @@ type Options struct {
 	SEP10JWTIssuer    string
 	FirebaseProjectID string
 
-	KMSMasterKeyURI            string
-	ServiceKeyPrivate          string
-	EncryptedServiceKeyPrivate string
+	KMSMasterKeyURI string
+	ServiceKeyset   string
 
 	AdminPort        int
 	MetricsNamespace string
@@ -105,7 +104,7 @@ func getHandlerDeps(opts Options) (handlerDeps, error) {
 	}
 	opts.Logger.Infof("SEP10 JWKS contains %d keys", len(sep10JWKS.Keys))
 
-	kms, err := crypto.NewKMS(opts.KMSMasterKeyURI, opts.EncryptedServiceKeyPrivate, opts.ServiceKeyPrivate)
+	kms, err := crypto.NewKMS(opts.KMSMasterKeyURI, opts.ServiceKeyset)
 	if err != nil {
 		return handlerDeps{}, errors.Wrap(err, "error initializing KMS")
 	}

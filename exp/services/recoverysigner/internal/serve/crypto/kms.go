@@ -14,18 +14,17 @@ type KMS interface {
 	Decrypt(plaintext, contextInfo []byte) ([]byte, error)
 }
 
-func NewKMS(masterKeyURI, encryptedServiceKeyPrivate, serviceKeyPrivate string) (KMS, error) {
+func NewKMS(masterKeyURI, serviceKeyset string) (KMS, error) {
 	if len(masterKeyURI) > 7 {
 		prefix := masterKeyURI[0:7]
-
 		switch prefix {
 		case awsPrefix:
-			return newSecureServiceKeyWithAWS(masterKeyURI, []byte(encryptedServiceKeyPrivate))
+			return newSecureServiceKeyWithAWS(masterKeyURI, []byte(serviceKeyset))
 
 		default:
 			return nil, errors.New("KMS_MASTER_KEY_URI does not start with a valid prefix (aws-kms)")
 		}
 	}
 
-	return newInsecureServiceKey([]byte(serviceKeyPrivate))
+	return newInsecureServiceKey([]byte(serviceKeyset))
 }
