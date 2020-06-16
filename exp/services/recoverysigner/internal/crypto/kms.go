@@ -24,6 +24,9 @@ func NewKMS(masterKeyURI, serviceKeyKeyset string) (KMS, error) {
 
 			return newSecureServiceKey(kmsClient, masterKeyURI, []byte(serviceKeyKeyset))
 
+		case "mockkms":
+			return newSecureServiceKey(mockKMSClient{}, "mock-key-uri", []byte(serviceKeyKeyset))
+
 		default:
 			return nil, errors.New("unrecognized prefix in master key URI")
 		}

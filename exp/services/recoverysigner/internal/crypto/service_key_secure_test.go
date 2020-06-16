@@ -19,7 +19,7 @@ func TestNewSecureServiceKey(t *testing.T) {
 	assert.NotNil(t, serviceKey.keyset)
 	assert.NotNil(t, serviceKey.hybridEncrypt)
 
-	serviceKey, err = newSecureServiceKey(mockKMSClient{}, "aws-kms://key-uri", []byte(""))
+	serviceKey, err = newSecureServiceKey(mockKMSClient{}, "mock-key-uri", []byte(""))
 	assert.Error(t, err)
 	assert.Nil(t, serviceKey)
 }
@@ -29,7 +29,7 @@ func TestSecureServiceKey_encryptDecrypt(t *testing.T) {
 	encryptedKsPriv, err := mockAEAD{}.Encrypt(ksPriv, nil)
 	require.NoError(t, err)
 
-	serviceKey, err := newSecureServiceKey(mockKMSClient{}, "aws-kms://key-uri", encryptedKsPriv)
+	serviceKey, err := newSecureServiceKey(mockKMSClient{}, "mock-key-uri", encryptedKsPriv)
 
 	plaintext := []byte("secure message")
 	contextInfo := []byte("context info")
