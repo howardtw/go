@@ -7,8 +7,8 @@ import (
 const awsPrefix = "aws-kms"
 
 type KMS interface {
-	Encrypt(plaintext, contextInfo []byte) ([]byte, error)
-	Decrypt(plaintext, contextInfo []byte) ([]byte, error)
+	Encrypt(plaintext, contextInfo []byte) (ciphertext []byte, err error)
+	Decrypt(ciphertext, contextInfo []byte) (plaintext []byte, err error)
 }
 
 func NewKMS(masterKeyURI, serviceKeyset string) (KMS, error) {
