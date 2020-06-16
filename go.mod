@@ -21,6 +21,7 @@ require (
 	github.com/go-chi/chi v4.0.3+incompatible
 	github.com/go-errors/errors v0.0.0-20150906023321-a41850380601
 	github.com/gobuffalo/packr v1.12.1 // indirect
+	github.com/golang/protobuf v1.4.2
 	github.com/google/go-querystring v0.0.0-20160401233042-9235644dd9e5 // indirect
 	github.com/google/tink/go v1.4.0-rc2
 	github.com/gorilla/schema v1.1.0
