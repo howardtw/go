@@ -1,6 +1,7 @@
 package crypto
 
 import (
+	"github.com/google/tink/go/integration/awskms"
 	"github.com/stellar/go/support/errors"
 )
 
@@ -16,7 +17,12 @@ func NewKMS(masterKeyURI, serviceKeyset string) (KMS, error) {
 		prefix := masterKeyURI[0:7]
 		switch prefix {
 		case awsPrefix:
-			return newSecureServiceKeyWithAWS(masterKeyURI, []byte(serviceKeyset))
+			kmsClient, err := awskms.NewClient(masterKeyURI)
+			if err != nil {
+				return nil, errors.Wrap(err, "initializing AWS KMS client")
+			}
+
+			return newSecureServiceKey(kmsClient, masterKeyURI, []byte(serviceKeyset))
 
 		default:
 			return nil, errors.New("unrecognized prefix in master key URI")

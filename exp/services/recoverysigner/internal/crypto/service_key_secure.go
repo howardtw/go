@@ -6,7 +6,6 @@ import (
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/hybrid"
 	"github.com/google/tink/go/insecurecleartextkeyset"
-	"github.com/google/tink/go/integration/awskms"
 	"github.com/google/tink/go/keyset"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 	"github.com/google/tink/go/tink"
@@ -25,14 +24,9 @@ type SecureServiceKey struct {
 
 // masterKeyURI must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
 // See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
-func newSecureServiceKeyWithAWS(masterKeyURI string, encryptedPrivateKey []byte) (*SecureServiceKey, error) {
+func newSecureServiceKey(client registry.KMSClient, masterKeyURI string, encryptedPrivateKey []byte) (*SecureServiceKey, error) {
 	if len(encryptedPrivateKey) == 0 {
 		return nil, errors.New("ENCRYPTED_SERVICE_KEY_PRIVATE is empty")
-	}
-
-	client, err := awskms.NewClient(masterKeyURI)
-	if err != nil {
-		return nil, errors.Wrap(err, "initializing AWS KMS client")
 	}
 
 	registry.RegisterKMSClient(client)
