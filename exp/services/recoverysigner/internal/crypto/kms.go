@@ -4,10 +4,7 @@ import (
 	"github.com/stellar/go/support/errors"
 )
 
-const (
-	awsPrefix = "aws-kms"
-	gcpPrefix = "gcp-kms"
-)
+const awsPrefix = "aws-kms"
 
 type KMS interface {
 	Encrypt(plaintext, contextInfo []byte) ([]byte, error)
