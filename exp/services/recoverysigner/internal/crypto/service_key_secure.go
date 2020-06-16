@@ -24,21 +24,21 @@ type SecureServiceKey struct {
 
 // masterKeyURI must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
 // See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
-func newSecureServiceKey(client registry.KMSClient, masterKeyURI string, encryptedPrivateKey []byte) (*SecureServiceKey, error) {
-	if len(encryptedPrivateKey) == 0 {
-		return nil, errors.New("ENCRYPTED_SERVICE_KEY_PRIVATE is empty")
+func newSecureServiceKey(client registry.KMSClient, masterKeyURI string, encryptedServiceKeyset []byte) (*SecureServiceKey, error) {
+	if len(encryptedServiceKeyset) == 0 {
+		return nil, errors.New("no service keyset is present")
 	}
 
 	registry.RegisterKMSClient(client)
 
 	aead, err := client.GetAEAD(masterKeyURI)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting AEAD primitive from AWS KMS")
+		return nil, errors.Wrap(err, "getting AEAD primitive from KMS")
 	}
 
-	ksPriv, err := aead.Decrypt(encryptedPrivateKey, nil)
+	ksPriv, err := aead.Decrypt(encryptedServiceKeyset, nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "decrypting private key")
+		return nil, errors.Wrap(err, "decrypting service keyset")
 	}
 
 	khPriv, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(bytes.NewReader(ksPriv)))
@@ -52,7 +52,7 @@ func newSecureServiceKey(client registry.KMSClient, masterKeyURI string, encrypt
 	memKeyset := &keyset.MemReaderWriter{}
 	err = khPriv.Write(memKeyset, aead)
 	if err != nil {
-		return nil, errors.Wrap(err, "encrypting private key keyset")
+		return nil, errors.Wrap(err, "encrypting service key keyset")
 	}
 
 	khPub, err := khPriv.Public()
@@ -62,7 +62,7 @@ func newSecureServiceKey(client registry.KMSClient, masterKeyURI string, encrypt
 
 	he, err := hybrid.NewHybridEncrypt(khPub)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting hybrid encryption primitive")
+		return nil, errors.Wrap(err, "getting hybrid encryption service key primitive")
 	}
 
 	return &SecureServiceKey{
@@ -76,16 +76,16 @@ func (ks *SecureServiceKey) Encrypt(plaintext, contextInfo []byte) ([]byte, erro
 	return ks.hybridEncrypt.Encrypt(plaintext, contextInfo)
 }
 
-func (ks *SecureServiceKey) Decrypt(plaintext, contextInfo []byte) ([]byte, error) {
+func (ks *SecureServiceKey) Decrypt(ciphertext, contextInfo []byte) ([]byte, error) {
 	khPriv, err := keyset.Read(&keyset.MemReaderWriter{EncryptedKeyset: ks.keyset}, ks.remote)
 	if err != nil {
-		return nil, errors.Wrap(err, "decrypting private key keyset")
+		return nil, errors.Wrap(err, "decrypting service key keyset")
 	}
 
 	hd, err := hybrid.NewHybridDecrypt(khPriv)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting hybrid decryption primitive")
+		return nil, errors.Wrap(err, "getting hybrid decryption service key primitive")
 	}
 
-	return hd.Decrypt(plaintext, contextInfo)
+	return hd.Decrypt(ciphertext, contextInfo)
 }
