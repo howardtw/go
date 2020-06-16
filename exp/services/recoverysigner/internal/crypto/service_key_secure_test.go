@@ -18,6 +18,10 @@ func TestNewSecureServiceKey(t *testing.T) {
 	assert.NotNil(t, serviceKey.remote)
 	assert.NotNil(t, serviceKey.keyset)
 	assert.NotNil(t, serviceKey.hybridEncrypt)
+
+	serviceKey, err = newSecureServiceKey(mockKMSClient{}, "aws-kms://key-uri", []byte(""))
+	assert.Error(t, err)
+	assert.Nil(t, serviceKey)
 }
 
 func TestSecureServiceKey_encryptDecrypt(t *testing.T) {

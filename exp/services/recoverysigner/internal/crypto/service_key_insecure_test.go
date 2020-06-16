@@ -18,6 +18,10 @@ func TestNewInsecureServiceKey(t *testing.T) {
 	assert.NotNil(t, serviceKey)
 	assert.NotNil(t, serviceKey.hybridEncrypt)
 	assert.NotNil(t, serviceKey.hybridDecrypt)
+
+	serviceKey, err = newInsecureServiceKey([]byte(""))
+	assert.Error(t, err)
+	assert.Nil(t, serviceKey)
 }
 
 func TestInsecureServiceKey_encryptDecrypt(t *testing.T) {
