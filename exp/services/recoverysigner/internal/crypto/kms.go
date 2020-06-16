@@ -19,7 +19,7 @@ func NewKMS(masterKeyURI, serviceKeyset string) (KMS, error) {
 			return newSecureServiceKeyWithAWS(masterKeyURI, []byte(serviceKeyset))
 
 		default:
-			return nil, errors.New("KMS_MASTER_KEY_URI does not start with a valid prefix (aws-kms)")
+			return nil, errors.New("unrecognized prefix in master key URI")
 		}
 	}
 
