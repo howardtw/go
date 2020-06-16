@@ -12,7 +12,7 @@ type KMS interface {
 	Decrypt(ciphertext, contextInfo []byte) (plaintext []byte, err error)
 }
 
-func NewKMS(masterKeyURI, serviceKeyset string) (KMS, error) {
+func NewKMS(masterKeyURI, serviceKeyKeyset string) (KMS, error) {
 	if len(masterKeyURI) > 7 {
 		prefix := masterKeyURI[0:7]
 		switch prefix {
@@ -22,12 +22,12 @@ func NewKMS(masterKeyURI, serviceKeyset string) (KMS, error) {
 				return nil, errors.Wrap(err, "initializing AWS KMS client")
 			}
 
-			return newSecureServiceKey(kmsClient, masterKeyURI, []byte(serviceKeyset))
+			return newSecureServiceKey(kmsClient, masterKeyURI, []byte(serviceKeyKeyset))
 
 		default:
 			return nil, errors.New("unrecognized prefix in master key URI")
 		}
 	}
 
-	return newInsecureServiceKey([]byte(serviceKeyset))
+	return newInsecureServiceKey([]byte(serviceKeyKeyset))
 }

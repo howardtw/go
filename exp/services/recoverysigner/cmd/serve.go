@@ -99,7 +99,7 @@ func (c *ServeCommand) Command() *cobra.Command {
 			Name:        "local-kek-keyset",
 			Usage:       "Tink keyset containing local key-encryption-key (KEK) used to encrypt/decrypt data-encryption-keys (DEK). The keyset is encrypted by the remote KEK specified in remote-kek-uri if present",
 			OptType:     types.String,
-			ConfigKey:   &opts.ServiceKeyset,
+			ConfigKey:   &opts.ServiceKeyKeyset,
 			FlagDefault: "",
 			Required:    false,
 		},

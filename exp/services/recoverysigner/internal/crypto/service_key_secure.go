@@ -24,9 +24,9 @@ type SecureServiceKey struct {
 
 // masterKeyURI must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
 // See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
-func newSecureServiceKey(client registry.KMSClient, masterKeyURI string, encryptedServiceKeyset []byte) (*SecureServiceKey, error) {
-	if len(encryptedServiceKeyset) == 0 {
-		return nil, errors.New("no service keyset is present")
+func newSecureServiceKey(client registry.KMSClient, masterKeyURI string, encryptedServiceKeyKeyset []byte) (*SecureServiceKey, error) {
+	if len(encryptedServiceKeyKeyset) == 0 {
+		return nil, errors.New("no service key keyset is present")
 	}
 
 	registry.RegisterKMSClient(client)
@@ -36,9 +36,9 @@ func newSecureServiceKey(client registry.KMSClient, masterKeyURI string, encrypt
 		return nil, errors.Wrap(err, "getting AEAD primitive from KMS")
 	}
 
-	ksPriv, err := aead.Decrypt(encryptedServiceKeyset, nil)
+	ksPriv, err := aead.Decrypt(encryptedServiceKeyKeyset, nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "decrypting service keyset")
+		return nil, errors.Wrap(err, "decrypting service key keyset")
 	}
 
 	khPriv, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(bytes.NewReader(ksPriv)))
