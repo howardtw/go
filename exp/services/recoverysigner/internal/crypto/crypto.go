@@ -15,8 +15,8 @@ type Decrypter interface {
 	Decrypt(ciphertext, contextInfo []byte) (plaintext []byte, err error)
 }
 
-func NewEncrypter(masterKeyURI, serviceKeyKeyset string) (Encrypter, error) {
-	srvKey, err := newServiceKey(masterKeyURI, serviceKeyKeyset)
+func NewEncrypter(remoteKEKURI, tinkKeyset string) (Encrypter, error) {
+	srvKey, err := newServiceKey(remoteKEKURI, tinkKeyset)
 	if err != nil {
 		return nil, err
 	}
@@ -29,8 +29,8 @@ func NewEncrypter(masterKeyURI, serviceKeyKeyset string) (Encrypter, error) {
 	return encrypter, nil
 }
 
-func NewDecrypter(masterKeyURI, serviceKeyKeyset string) (Decrypter, error) {
-	srvKey, err := newServiceKey(masterKeyURI, serviceKeyKeyset)
+func NewDecrypter(remoteKEKURI, tinkKeyset string) (Decrypter, error) {
+	srvKey, err := newServiceKey(remoteKEKURI, tinkKeyset)
 	if err != nil {
 		return nil, err
 	}
@@ -43,25 +43,25 @@ func NewDecrypter(masterKeyURI, serviceKeyKeyset string) (Decrypter, error) {
 	return decrypter, nil
 }
 
-func newServiceKey(masterKeyURI, serviceKeyKeyset string) (interface{}, error) {
-	if len(masterKeyURI) > 7 {
-		prefix := masterKeyURI[0:7]
+func newServiceKey(remoteKEKURI, tinkKeyset string) (interface{}, error) {
+	if len(remoteKEKURI) > 7 {
+		prefix := remoteKEKURI[0:7]
 		switch prefix {
 		case awsPrefix:
-			kmsClient, err := awskms.NewClient(masterKeyURI)
+			kmsClient, err := awskms.NewClient(remoteKEKURI)
 			if err != nil {
 				return nil, errors.Wrap(err, "initializing AWS KMS client")
 			}
 
-			return newSecureServiceKey(kmsClient, masterKeyURI, []byte(serviceKeyKeyset))
+			return newSecureServiceKey(kmsClient, remoteKEKURI, []byte(tinkKeyset))
 
 		case "mockkms":
-			return newSecureServiceKey(mockKMSClient{}, "mock-key-uri", []byte(serviceKeyKeyset))
+			return newSecureServiceKey(mockKMSClient{}, "mock-key-uri", []byte(tinkKeyset))
 
 		default:
 			return nil, errors.New("unrecognized prefix in master key URI")
 		}
 	}
 
-	return newInsecureServiceKey([]byte(serviceKeyKeyset))
+	return newInsecureServiceKey([]byte(tinkKeyset))
 }

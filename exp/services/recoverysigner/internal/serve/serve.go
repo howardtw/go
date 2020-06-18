@@ -31,8 +31,8 @@ type Options struct {
 	SEP10JWTIssuer    string
 	FirebaseProjectID string
 
-	KMSMasterKeyURI  string
-	ServiceKeyKeyset string
+	RemoteKEKURI  string
+	TinkKeyset string
 
 	AdminPort        int
 	MetricsNamespace string
@@ -105,12 +105,12 @@ func getHandlerDeps(opts Options) (handlerDeps, error) {
 	}
 	opts.Logger.Infof("SEP10 JWKS contains %d keys", len(sep10JWKS.Keys))
 
-	encrypter, err := crypto.NewEncrypter(opts.KMSMasterKeyURI, opts.ServiceKeyKeyset)
+	encrypter, err := crypto.NewEncrypter(opts.RemoteKEKURI, opts.TinkKeyset)
 	if err != nil {
 		return handlerDeps{}, errors.Wrap(err, "error initializing encrypter")
 	}
 
-	decrypter, err := crypto.NewDecrypter(opts.KMSMasterKeyURI, opts.ServiceKeyKeyset)
+	decrypter, err := crypto.NewDecrypter(opts.RemoteKEKURI, opts.TinkKeyset)
 	if err != nil {
 		return handlerDeps{}, errors.Wrap(err, "error initializing decrypter")
 	}
