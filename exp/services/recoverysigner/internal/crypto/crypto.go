@@ -45,7 +45,7 @@ func NewDecrypter(remoteKEKURI, tinkKeyset string) (Decrypter, error) {
 
 func newServiceKey(remoteKEKURI, tinkKeyset string) (interface{}, error) {
 	if len(remoteKEKURI) == 0 {
-		return newInsecureServiceKey([]byte(tinkKeyset))
+		return newInsecureServiceKey(tinkKeyset)
 	}
 
 	if len(remoteKEKURI) <= 7 {
@@ -60,10 +60,10 @@ func newServiceKey(remoteKEKURI, tinkKeyset string) (interface{}, error) {
 			return nil, errors.Wrap(err, "initializing AWS KMS client")
 		}
 
-		return newSecureServiceKey(kmsClient, remoteKEKURI, []byte(tinkKeyset))
+		return newSecureServiceKey(kmsClient, remoteKEKURI, tinkKeyset)
 
 	case "mockkms":
-		return newSecureServiceKey(mockKMSClient{}, "mock-key-uri", []byte(tinkKeyset))
+		return newSecureServiceKey(mockKMSClient{}, "mock-key-uri", tinkKeyset)
 
 	default:
 		return nil, errors.New("unrecognized prefix in remote KEK URI")

@@ -24,7 +24,7 @@ type SecureServiceKey struct {
 
 // remoteKEKURI must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
 // See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
-func newSecureServiceKey(client registry.KMSClient, remoteKEKURI string, encryptedTinkKeyset []byte) (*SecureServiceKey, error) {
+func newSecureServiceKey(client registry.KMSClient, remoteKEKURI, encryptedTinkKeyset string) (*SecureServiceKey, error) {
 	if len(encryptedTinkKeyset) == 0 {
 		return nil, errors.New("no keyset is present")
 	}
@@ -36,7 +36,7 @@ func newSecureServiceKey(client registry.KMSClient, remoteKEKURI string, encrypt
 		return nil, errors.Wrap(err, "getting AEAD primitive from KMS")
 	}
 
-	ksPriv, err := aead.Decrypt(encryptedTinkKeyset, nil)
+	ksPriv, err := aead.Decrypt([]byte(encryptedTinkKeyset), nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "decrypting keyset")
 	}

@@ -1,7 +1,7 @@
 package crypto
 
 import (
-	"bytes"
+	"strings"
 
 	"github.com/google/tink/go/hybrid"
 	"github.com/google/tink/go/insecurecleartextkeyset"
@@ -19,12 +19,12 @@ type InsecureServiceKey struct {
 	hybridDecrypt tink.HybridDecrypt
 }
 
-func newInsecureServiceKey(tinkKeyset []byte) (*InsecureServiceKey, error) {
+func newInsecureServiceKey(tinkKeyset string) (*InsecureServiceKey, error) {
 	if len(tinkKeyset) == 0 {
 		return nil, errors.New("no keyset is present")
 	}
 
-	khPriv, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(bytes.NewReader(tinkKeyset)))
+	khPriv, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(strings.NewReader(tinkKeyset)))
 	if err != nil {
 		return nil, errors.Wrap(err, "getting key handle for private key")
 	}
