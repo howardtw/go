@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"go/types"
+	"os"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/hybrid"
@@ -14,8 +15,9 @@ import (
 )
 
 type KeysetCommand struct {
-	Logger       *supportlog.Entry
-	RemoteKEKURI string
+	Logger         *supportlog.Entry
+	RemoteKEKURI   string
+	OutputFilePath string
 }
 
 func (c *KeysetCommand) Command() *cobra.Command {
@@ -25,6 +27,14 @@ func (c *KeysetCommand) Command() *cobra.Command {
 			Usage:       "URI for a remote key-encryption-key (KEK) used to encrypt Tink keyset",
 			OptType:     types.String,
 			ConfigKey:   &c.RemoteKEKURI,
+			FlagDefault: "",
+			Required:    false,
+		},
+		{
+			Name:        "output-filepath",
+			Usage:       "File path to which the keyset is written",
+			OptType:     types.String,
+			ConfigKey:   &c.OutputFilePath,
 			FlagDefault: "",
 			Required:    false,
 		},
@@ -61,6 +71,7 @@ func (c *KeysetCommand) Create() {
 	}
 
 	memKeyset := &keyset.MemReaderWriter{}
+	ksPriv := []byte{}
 	if c.RemoteKEKURI != "" {
 		kmsClient, err := awskms.NewClient(c.RemoteKEKURI)
 		if err != nil {
@@ -80,14 +91,11 @@ func (c *KeysetCommand) Create() {
 			return
 		}
 
-		ksPriv, err := proto.Marshal(memKeyset.EncryptedKeyset)
+		ksPriv, err = proto.Marshal(memKeyset.EncryptedKeyset)
 		if err != nil {
 			c.Logger.Errorf("Error serializing encrypted keyset: %s", err.Error())
 			return
 		}
-
-		c.Logger.Infof("Encrypted Tink keyset: %s", ksPriv)
-
 	} else {
 		err = insecurecleartextkeyset.Write(khPriv, memKeyset)
 		if err != nil {
@@ -95,12 +103,30 @@ func (c *KeysetCommand) Create() {
 			return
 		}
 
-		ksPriv, err := proto.Marshal(memKeyset.Keyset)
+		ksPriv, err = proto.Marshal(memKeyset.Keyset)
 		if err != nil {
 			c.Logger.Errorf("Error serializing cleartext keyset: %s", err.Error())
 			return
 		}
-
-		c.Logger.Infof("Cleartext Tink keyset: %s", ksPriv)
 	}
+
+	filePath := "keyset.cfg"
+	if c.OutputFilePath != "" {
+		filePath = c.OutputFilePath
+	}
+
+	f, err := os.OpenFile(filePath, os.O_EXCL|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		c.Logger.Errorf("Error opening output file: %s", err.Error())
+		return
+	}
+	defer f.Close()
+
+	_, err = f.Write(ksPriv)
+	if err != nil {
+		c.Logger.Errorf("Error writing to output file: %s", err.Error())
+		return
+	}
+
+	c.Logger.Info("Tink keyset has been written to a file. The default file name is 'keyset.cfg'.")
 }
