@@ -8,11 +8,9 @@ import (
 )
 
 func TestNewSecureServiceKey(t *testing.T) {
-	ksPriv := generateHybridEncryptionPrivateKeyKeyset(t)
-	encryptedKsPriv, err := mockAEAD{}.Encrypt(ksPriv, nil)
-	require.NoError(t, err)
+	ksPriv := generateHybridKeysetEncrypted(t)
 
-	serviceKey, err := newSecureServiceKey(mockKMSClient{}, "aws-kms://key-uri", string(encryptedKsPriv))
+	serviceKey, err := newSecureServiceKey(mockKMSClient{}, "aws-kms://key-uri", string(ksPriv))
 	require.NoError(t, err)
 	assert.NotNil(t, serviceKey)
 	assert.NotNil(t, serviceKey.remote)
@@ -25,11 +23,9 @@ func TestNewSecureServiceKey(t *testing.T) {
 }
 
 func TestSecureServiceKey_encryptDecrypt(t *testing.T) {
-	ksPriv := generateHybridEncryptionPrivateKeyKeyset(t)
-	encryptedKsPriv, err := mockAEAD{}.Encrypt(ksPriv, nil)
-	require.NoError(t, err)
+	ksPriv := generateHybridKeysetEncrypted(t)
 
-	serviceKey, err := newSecureServiceKey(mockKMSClient{}, "mock-key-uri", string(encryptedKsPriv))
+	serviceKey, err := newSecureServiceKey(mockKMSClient{}, "mock-key-uri", string(ksPriv))
 
 	plaintext := []byte("secure message")
 	contextInfo := []byte("context info")

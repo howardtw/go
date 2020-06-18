@@ -8,14 +8,14 @@ import (
 )
 
 func TestNewEncrypter(t *testing.T) {
-	ksPriv := generateHybridEncryptionPrivateKeyKeyset(t)
+	ksPriv := generateHybridKeysetCleartext(t)
 	encrypter, err := NewEncrypter("", string(ksPriv))
 	require.NoError(t, err)
 	assert.IsType(t, (*InsecureServiceKey)(nil), encrypter)
 }
 
 func TestNewDecrypter(t *testing.T) {
-	ksPriv := generateHybridEncryptionPrivateKeyKeyset(t)
+	ksPriv := generateHybridKeysetCleartext(t)
 	decrypter, err := NewDecrypter("", string(ksPriv))
 	require.NoError(t, err)
 	assert.IsType(t, (*InsecureServiceKey)(nil), decrypter)

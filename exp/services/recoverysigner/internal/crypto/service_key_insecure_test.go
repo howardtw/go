@@ -8,7 +8,7 @@ import (
 )
 
 func TestNewInsecureServiceKey(t *testing.T) {
-	ksPriv := generateHybridEncryptionPrivateKeyKeyset(t)
+	ksPriv := generateHybridKeysetCleartext(t)
 	serviceKey, err := newInsecureServiceKey(string(ksPriv))
 	require.NoError(t, err)
 	assert.NotNil(t, serviceKey)
@@ -21,7 +21,7 @@ func TestNewInsecureServiceKey(t *testing.T) {
 }
 
 func TestInsecureServiceKey_encryptDecrypt(t *testing.T) {
-	ksPriv := generateHybridEncryptionPrivateKeyKeyset(t)
+	ksPriv := generateHybridKeysetCleartext(t)
 	serviceKey, err := newInsecureServiceKey(string(ksPriv))
 	require.NoError(t, err)
 

@@ -5,7 +5,6 @@ import (
 
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/hybrid"
-	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/keyset"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 	"github.com/google/tink/go/tink"
@@ -41,18 +40,10 @@ func newSecureServiceKey(client registry.KMSClient, remoteKEKURI, encryptedTinkK
 		return nil, errors.Wrap(err, "getting AEAD primitive from KMS")
 	}
 
-	ksPriv, err := aead.Decrypt([]byte(encryptedTinkKeyset), nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "decrypting keyset")
-	}
-
-	khPriv, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(bytes.NewReader(ksPriv)))
+	khPriv, err := keyset.Read(keyset.NewBinaryReader(bytes.NewReader([]byte(encryptedTinkKeyset))), aead)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting key handle for private key")
 	}
-
-	// remove the reference to the decrypted private key from memory
-	ksPriv = nil
 
 	memKeyset := &keyset.MemReaderWriter{}
 	err = khPriv.Write(memKeyset, aead)
