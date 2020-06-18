@@ -70,7 +70,8 @@ type handlerDeps struct {
 	NetworkPassphrase  string
 	SigningKeys        []*keypair.Full
 	SigningAddresses   []*keypair.FromAddress
-	KMS                crypto.KMS
+	Encrypter          crypto.Encrypter
+	Decrypter          crypto.Decrypter
 	AccountStore       account.Store
 	SEP10JWKS          jose.JSONWebKeySet
 	SEP10JWTIssuer     string
@@ -104,9 +105,14 @@ func getHandlerDeps(opts Options) (handlerDeps, error) {
 	}
 	opts.Logger.Infof("SEP10 JWKS contains %d keys", len(sep10JWKS.Keys))
 
-	kms, err := crypto.NewKMS(opts.KMSMasterKeyURI, opts.ServiceKeyKeyset)
+	encrypter, err := crypto.NewEncrypter(opts.KMSMasterKeyURI, opts.ServiceKeyKeyset)
 	if err != nil {
-		return handlerDeps{}, errors.Wrap(err, "error initializing KMS")
+		return handlerDeps{}, errors.Wrap(err, "error initializing encrypter")
+	}
+
+	decrypter, err := crypto.NewDecrypter(opts.KMSMasterKeyURI, opts.ServiceKeyKeyset)
+	if err != nil {
+		return handlerDeps{}, errors.Wrap(err, "error initializing decrypter")
 	}
 
 	db, err := db.Open(opts.DatabaseURL)
@@ -153,7 +159,8 @@ func getHandlerDeps(opts Options) (handlerDeps, error) {
 		NetworkPassphrase:  opts.NetworkPassphrase,
 		SigningKeys:        signingKeys,
 		SigningAddresses:   signingAddresses,
-		KMS:                kms,
+		Encrypter:          encrypter,
+		Decrypter:          decrypter,
 		AccountStore:       accountStore,
 		SEP10JWKS:          sep10JWKS,
 		SEP10JWTIssuer:     opts.SEP10JWTIssuer,

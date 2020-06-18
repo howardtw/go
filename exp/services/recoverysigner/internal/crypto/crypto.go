@@ -7,12 +7,43 @@ import (
 
 const awsPrefix = "aws-kms"
 
-type KMS interface {
+type Encrypter interface {
 	Encrypt(plaintext, contextInfo []byte) (ciphertext []byte, err error)
+}
+
+type Decrypter interface {
 	Decrypt(ciphertext, contextInfo []byte) (plaintext []byte, err error)
 }
 
-func NewKMS(masterKeyURI, serviceKeyKeyset string) (KMS, error) {
+func NewEncrypter(masterKeyURI, serviceKeyKeyset string) (Encrypter, error) {
+	srvKey, err := newServiceKey(masterKeyURI, serviceKeyKeyset)
+	if err != nil {
+		return nil, err
+	}
+
+	encrypter, ok := srvKey.(Encrypter)
+	if !ok {
+		return nil, errors.New("service key is not an Encrypter")
+	}
+
+	return encrypter, nil
+}
+
+func NewDecrypter(masterKeyURI, serviceKeyKeyset string) (Decrypter, error) {
+	srvKey, err := newServiceKey(masterKeyURI, serviceKeyKeyset)
+	if err != nil {
+		return nil, err
+	}
+
+	decrypter, ok := srvKey.(Decrypter)
+	if !ok {
+		return nil, errors.New("service key is not a Decrypter")
+	}
+
+	return decrypter, nil
+}
+
+func newServiceKey(masterKeyURI, serviceKeyKeyset string) (interface{}, error) {
 	if len(masterKeyURI) > 7 {
 		prefix := masterKeyURI[0:7]
 		switch prefix {
