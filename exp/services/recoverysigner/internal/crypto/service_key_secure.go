@@ -46,7 +46,7 @@ func newSecureServiceKey(client registry.KMSClient, masterKeyURI string, encrypt
 		return nil, errors.Wrap(err, "getting key handle for private key")
 	}
 
-	// remove the decrypted private key from memory
+	// remove the reference to the decrypted private key from memory
 	ksPriv = nil
 
 	memKeyset := &keyset.MemReaderWriter{}
