@@ -96,10 +96,10 @@ func (c *ServeCommand) Command() *cobra.Command {
 			Required:    false,
 		},
 		{
-			Name:        "tink-keyset",
-			Usage:       "Tink keyset used to encrypt/decrypt signing keys. The keyset is encrypted by the remote KEK specified in remote-kek-uri if present",
+			Name:        "tink-keyset-filepath",
+			Usage:       "File path of Tink keyset used to encrypt/decrypt signing keys. The keyset is encrypted by the remote KEK specified in remote-kek-uri if present",
 			OptType:     types.String,
-			ConfigKey:   &opts.TinkKeyset,
+			ConfigKey:   &opts.TinkKeysetFilepath,
 			FlagDefault: "",
 			Required:    true,
 		},

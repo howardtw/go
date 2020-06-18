@@ -1,6 +1,7 @@
 package crypto
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,14 +10,14 @@ import (
 
 func TestNewEncrypter(t *testing.T) {
 	ksPriv := generateHybridKeysetCleartext(t)
-	encrypter, err := NewEncrypter("", string(ksPriv))
+	encrypter, err := NewEncrypter("", bytes.NewReader(ksPriv))
 	require.NoError(t, err)
 	assert.IsType(t, (*InsecureServiceKey)(nil), encrypter)
 }
 
 func TestNewDecrypter(t *testing.T) {
 	ksPriv := generateHybridKeysetCleartext(t)
-	decrypter, err := NewDecrypter("", string(ksPriv))
+	decrypter, err := NewDecrypter("", bytes.NewReader(ksPriv))
 	require.NoError(t, err)
 	assert.IsType(t, (*InsecureServiceKey)(nil), decrypter)
 }

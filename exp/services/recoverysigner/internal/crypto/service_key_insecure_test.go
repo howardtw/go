@@ -9,20 +9,20 @@ import (
 
 func TestNewInsecureServiceKey(t *testing.T) {
 	ksPriv := generateHybridKeysetCleartext(t)
-	serviceKey, err := newInsecureServiceKey(string(ksPriv))
+	serviceKey, err := newInsecureServiceKey(ksPriv)
 	require.NoError(t, err)
 	assert.NotNil(t, serviceKey)
 	assert.NotNil(t, serviceKey.hybridEncrypt)
 	assert.NotNil(t, serviceKey.hybridDecrypt)
 
-	serviceKey, err = newInsecureServiceKey("")
+	serviceKey, err = newInsecureServiceKey([]byte(""))
 	assert.Error(t, err)
 	assert.Nil(t, serviceKey)
 }
 
 func TestInsecureServiceKey_encryptDecrypt(t *testing.T) {
 	ksPriv := generateHybridKeysetCleartext(t)
-	serviceKey, err := newInsecureServiceKey(string(ksPriv))
+	serviceKey, err := newInsecureServiceKey(ksPriv)
 	require.NoError(t, err)
 
 	plaintext := []byte("secure message")

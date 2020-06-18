@@ -1,6 +1,9 @@
 package crypto
 
 import (
+	"io"
+	"io/ioutil"
+
 	"github.com/google/tink/go/integration/awskms"
 	"github.com/stellar/go/support/errors"
 )
@@ -15,10 +18,10 @@ type Decrypter interface {
 	Decrypt(ciphertext, contextInfo []byte) (plaintext []byte, err error)
 }
 
-func NewEncrypter(remoteKEKURI, tinkKeyset string) (Encrypter, error) {
-	srvKey, err := newServiceKey(remoteKEKURI, tinkKeyset)
+func NewEncrypter(remoteKEKURI string, keysetReader io.Reader) (Encrypter, error) {
+	srvKey, err := newServiceKey(remoteKEKURI, keysetReader)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "initializing service key")
 	}
 
 	encrypter, ok := srvKey.(Encrypter)
@@ -29,10 +32,10 @@ func NewEncrypter(remoteKEKURI, tinkKeyset string) (Encrypter, error) {
 	return encrypter, nil
 }
 
-func NewDecrypter(remoteKEKURI, tinkKeyset string) (Decrypter, error) {
-	srvKey, err := newServiceKey(remoteKEKURI, tinkKeyset)
+func NewDecrypter(remoteKEKURI string, keysetReader io.Reader) (Decrypter, error) {
+	srvKey, err := newServiceKey(remoteKEKURI, keysetReader)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "initializing service key")
 	}
 
 	decrypter, ok := srvKey.(Decrypter)
@@ -43,7 +46,12 @@ func NewDecrypter(remoteKEKURI, tinkKeyset string) (Decrypter, error) {
 	return decrypter, nil
 }
 
-func newServiceKey(remoteKEKURI, tinkKeyset string) (interface{}, error) {
+func newServiceKey(remoteKEKURI string, keysetReader io.Reader) (interface{}, error) {
+	tinkKeyset, err := ioutil.ReadAll(keysetReader)
+	if err != nil {
+		return nil, errors.Wrap(err, "reading keyset from the file path")
+	}
+
 	if len(remoteKEKURI) == 0 {
 		return newInsecureServiceKey(tinkKeyset)
 	}

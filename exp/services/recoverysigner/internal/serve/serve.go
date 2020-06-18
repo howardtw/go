@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	firebaseauth "firebase.google.com/go/auth"
@@ -31,8 +32,8 @@ type Options struct {
 	SEP10JWTIssuer    string
 	FirebaseProjectID string
 
-	RemoteKEKURI string
-	TinkKeyset   string
+	RemoteKEKURI       string
+	TinkKeysetFilepath string
 
 	AdminPort        int
 	MetricsNamespace string
@@ -105,12 +106,17 @@ func getHandlerDeps(opts Options) (handlerDeps, error) {
 	}
 	opts.Logger.Infof("SEP10 JWKS contains %d keys", len(sep10JWKS.Keys))
 
-	encrypter, err := crypto.NewEncrypter(opts.RemoteKEKURI, opts.TinkKeyset)
+	keysetReader, err := os.Open(opts.TinkKeysetFilepath)
+	if err != nil {
+		return handlerDeps{}, errors.Wrap(err, "opening keyset file")
+	}
+
+	encrypter, err := crypto.NewEncrypter(opts.RemoteKEKURI, keysetReader)
 	if err != nil {
 		return handlerDeps{}, errors.Wrap(err, "error initializing encrypter")
 	}
 
-	decrypter, err := crypto.NewDecrypter(opts.RemoteKEKURI, opts.TinkKeyset)
+	decrypter, err := crypto.NewDecrypter(opts.RemoteKEKURI, keysetReader)
 	if err != nil {
 		return handlerDeps{}, errors.Wrap(err, "error initializing decrypter")
 	}
