@@ -31,8 +31,8 @@ type Options struct {
 	SEP10JWTIssuer    string
 	FirebaseProjectID string
 
-	RemoteKEKURI  string
-	TinkKeyset string
+	RemoteKEKURI string
+	TinkKeyset   string
 
 	AdminPort        int
 	MetricsNamespace string
