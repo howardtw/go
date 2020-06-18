@@ -81,6 +81,7 @@ require (
 	github.com/yudai/pp v2.0.1+incompatible // indirect
 	github.com/ziutek/mymysql v1.5.4 // indirect
 	golang.org/x/crypto v0.0.0-20191119213627-4f8c1d86b1ba
+	golang.org/x/text v0.3.3 // indirect
 	google.golang.org/api v0.26.0
 	google.golang.org/genproto v0.0.0-20200612171551-7676ae05be11 // indirect
 	gopkg.in/gavv/httpexpect.v1 v1.0.0-20170111145843-40724cf1e4a0
