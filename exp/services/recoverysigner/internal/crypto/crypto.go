@@ -18,35 +18,7 @@ type Decrypter interface {
 	Decrypt(ciphertext, contextInfo []byte) (plaintext []byte, err error)
 }
 
-func NewEncrypter(remoteKEKURI string, keysetReader io.Reader) (Encrypter, error) {
-	srvKey, err := newServiceKey(remoteKEKURI, keysetReader)
-	if err != nil {
-		return nil, errors.Wrap(err, "initializing service key")
-	}
-
-	encrypter, ok := srvKey.(Encrypter)
-	if !ok {
-		return nil, errors.New("service key is not an Encrypter")
-	}
-
-	return encrypter, nil
-}
-
-func NewDecrypter(remoteKEKURI string, keysetReader io.Reader) (Decrypter, error) {
-	srvKey, err := newServiceKey(remoteKEKURI, keysetReader)
-	if err != nil {
-		return nil, errors.Wrap(err, "initializing service key")
-	}
-
-	decrypter, ok := srvKey.(Decrypter)
-	if !ok {
-		return nil, errors.New("service key is not a Decrypter")
-	}
-
-	return decrypter, nil
-}
-
-func newServiceKey(remoteKEKURI string, keysetReader io.Reader) (interface{}, error) {
+func NewServiceKey(remoteKEKURI string, keysetReader io.Reader) (interface{}, error) {
 	tinkKeyset, err := ioutil.ReadAll(keysetReader)
 	if err != nil {
 		return nil, errors.Wrap(err, "reading keyset from the file path")

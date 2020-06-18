@@ -108,17 +108,22 @@ func getHandlerDeps(opts Options) (handlerDeps, error) {
 
 	keysetReader, err := os.Open(opts.TinkKeysetFilepath)
 	if err != nil {
-		return handlerDeps{}, errors.Wrap(err, "opening keyset file")
+		return handlerDeps{}, errors.Wrap(err, "error opening keyset file")
 	}
 
-	encrypter, err := crypto.NewEncrypter(opts.RemoteKEKURI, keysetReader)
+	serviceKey, err := crypto.NewServiceKey(opts.RemoteKEKURI, keysetReader)
 	if err != nil {
-		return handlerDeps{}, errors.Wrap(err, "error initializing encrypter")
+		return handlerDeps{}, errors.Wrap(err, "error initializing service key")
 	}
 
-	decrypter, err := crypto.NewDecrypter(opts.RemoteKEKURI, keysetReader)
-	if err != nil {
-		return handlerDeps{}, errors.Wrap(err, "error initializing decrypter")
+	encrypter, ok := serviceKey.(crypto.Encrypter)
+	if !ok {
+		return handlerDeps{}, errors.New("service key is not an encrypter")
+	}
+
+	decrypter, ok := serviceKey.(crypto.Decrypter)
+	if !ok {
+		return handlerDeps{}, errors.New("service key is not a decrypter")
 	}
 
 	db, err := db.Open(opts.DatabaseURL)
