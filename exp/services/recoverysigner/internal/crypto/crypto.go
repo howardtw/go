@@ -62,9 +62,6 @@ func newServiceKey(remoteKEKURI, tinkKeyset string) (interface{}, error) {
 
 		return newSecureServiceKey(kmsClient, remoteKEKURI, tinkKeyset)
 
-	case "mockkms":
-		return newSecureServiceKey(mockKMSClient{}, "mock-key-uri", tinkKeyset)
-
 	default:
 		return nil, errors.New("unrecognized prefix in remote KEK URI")
 	}
