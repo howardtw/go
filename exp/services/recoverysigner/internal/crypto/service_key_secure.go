@@ -31,8 +31,8 @@ func newSecureServiceKey(client registry.KMSClient, remoteKEKURI string, encrypt
 	// The registration of the KMS client is only necessary if we want to
 	// use KMSEnvelopeAEAD. In other words, this is not required since we
 	// are not using envelope encryption to encrypt/decrypt the Tink
-	// keyset. However, it is ok to leave it here to defensive in case we
-	// change the strategy since it doesn't hurt.
+	// keyset. However, it doesn't hurt to leave it here to be defensive in
+	// case we change the strategy.
 	registry.RegisterKMSClient(client)
 
 	aead, err := client.GetAEAD(remoteKEKURI)
