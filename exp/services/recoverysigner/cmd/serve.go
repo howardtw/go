@@ -89,7 +89,7 @@ func (c *ServeCommand) Command() *cobra.Command {
 		},
 		{
 			Name:        "remote-kek-uri",
-			Usage:       "URI for a remote key-encryption-key (KEK) used to decrypt the local KEK",
+			Usage:       "URI for a remote key-encryption-key (KEK) used to decrypt the Tink keyset",
 			OptType:     types.String,
 			ConfigKey:   &opts.RemoteKEKURI,
 			FlagDefault: "",
