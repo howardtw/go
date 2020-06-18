@@ -23,7 +23,7 @@ type KeysetCommand struct {
 func (c *KeysetCommand) Command() *cobra.Command {
 	configOpts := config.ConfigOptions{
 		{
-			Name:        "remove-kek-uri",
+			Name:        "remote-kek-uri",
 			Usage:       "URI for a remote key-encryption-key (KEK) used to encrypt Tink keyset",
 			OptType:     types.String,
 			ConfigKey:   &c.RemoteKEKURI,
