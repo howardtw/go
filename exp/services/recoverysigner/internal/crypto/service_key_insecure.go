@@ -19,19 +19,19 @@ type InsecureServiceKey struct {
 	hybridDecrypt tink.HybridDecrypt
 }
 
-func newInsecureServiceKey(serviceKeyKeyset []byte) (*InsecureServiceKey, error) {
-	if len(serviceKeyKeyset) == 0 {
-		return nil, errors.New("no service key keyset is present")
+func newInsecureServiceKey(tinkKeyset []byte) (*InsecureServiceKey, error) {
+	if len(tinkKeyset) == 0 {
+		return nil, errors.New("no keyset is present")
 	}
 
-	khPriv, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(bytes.NewReader(serviceKeyKeyset)))
+	khPriv, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(bytes.NewReader(tinkKeyset)))
 	if err != nil {
 		return nil, errors.Wrap(err, "getting key handle for private key")
 	}
 
 	hd, err := hybrid.NewHybridDecrypt(khPriv)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting hybrid decryption service key primitive")
+		return nil, errors.Wrap(err, "getting hybrid decryption primitive")
 	}
 
 	khPub, err := khPriv.Public()
@@ -41,7 +41,7 @@ func newInsecureServiceKey(serviceKeyKeyset []byte) (*InsecureServiceKey, error)
 
 	he, err := hybrid.NewHybridEncrypt(khPub)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting hybrid encryption service key primitive")
+		return nil, errors.Wrap(err, "getting hybrid encryption primitive")
 	}
 
 	return &InsecureServiceKey{

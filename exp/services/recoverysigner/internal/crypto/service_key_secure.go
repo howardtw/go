@@ -22,23 +22,23 @@ type SecureServiceKey struct {
 	hybridEncrypt tink.HybridEncrypt
 }
 
-// masterKeyURI must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
+// remoteKEKURI must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
 // See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
-func newSecureServiceKey(client registry.KMSClient, masterKeyURI string, encryptedServiceKeyKeyset []byte) (*SecureServiceKey, error) {
-	if len(encryptedServiceKeyKeyset) == 0 {
-		return nil, errors.New("no service key keyset is present")
+func newSecureServiceKey(client registry.KMSClient, remoteKEKURI string, encryptedTinkKeyset []byte) (*SecureServiceKey, error) {
+	if len(encryptedTinkKeyset) == 0 {
+		return nil, errors.New("no keyset is present")
 	}
 
 	registry.RegisterKMSClient(client)
 
-	aead, err := client.GetAEAD(masterKeyURI)
+	aead, err := client.GetAEAD(remoteKEKURI)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting AEAD primitive from KMS")
 	}
 
-	ksPriv, err := aead.Decrypt(encryptedServiceKeyKeyset, nil)
+	ksPriv, err := aead.Decrypt(encryptedTinkKeyset, nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "decrypting service key keyset")
+		return nil, errors.Wrap(err, "decrypting keyset")
 	}
 
 	khPriv, err := insecurecleartextkeyset.Read(keyset.NewBinaryReader(bytes.NewReader(ksPriv)))
@@ -52,7 +52,7 @@ func newSecureServiceKey(client registry.KMSClient, masterKeyURI string, encrypt
 	memKeyset := &keyset.MemReaderWriter{}
 	err = khPriv.Write(memKeyset, aead)
 	if err != nil {
-		return nil, errors.Wrap(err, "encrypting service key keyset")
+		return nil, errors.Wrap(err, "encrypting keyset")
 	}
 
 	khPub, err := khPriv.Public()
@@ -62,7 +62,7 @@ func newSecureServiceKey(client registry.KMSClient, masterKeyURI string, encrypt
 
 	he, err := hybrid.NewHybridEncrypt(khPub)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting hybrid encryption service key primitive")
+		return nil, errors.Wrap(err, "getting hybrid encryption primitive")
 	}
 
 	return &SecureServiceKey{
