@@ -101,7 +101,7 @@ func (c *ServeCommand) Command() *cobra.Command {
 			OptType:     types.String,
 			ConfigKey:   &opts.ServiceKeyKeyset,
 			FlagDefault: "",
-			Required:    false,
+			Required:    true,
 		},
 	}
 	cmd := &cobra.Command{
