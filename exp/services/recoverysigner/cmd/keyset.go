@@ -14,16 +14,15 @@ import (
 )
 
 type KeysetCommand struct {
-	Logger         *supportlog.Entry
-	RemoteKEKURI   string
-	OutputFilePath string
+	Logger       *supportlog.Entry
+	RemoteKEKURI string
 }
 
 func (c *KeysetCommand) Command() *cobra.Command {
 	configOpts := config.ConfigOptions{
 		{
-			Name:        "remote-kek-uri",
-			Usage:       "URI for a remote key-encryption-key (KEK) used to encrypt Tink keyset",
+			Name:        "encryption-kms-key-uri",
+			Usage:       "URI for a remote KMS key used to encrypt Tink keyset",
 			OptType:     types.String,
 			ConfigKey:   &c.RemoteKEKURI,
 			FlagDefault: "",
@@ -31,7 +30,7 @@ func (c *KeysetCommand) Command() *cobra.Command {
 		},
 	}
 	cmd := &cobra.Command{
-		Use:   "keyset",
+		Use:   "encryption-tink-keyset",
 		Short: "Run Tink keyset operations",
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			configOpts.SetValues()
