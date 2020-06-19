@@ -2,9 +2,8 @@ package cmd
 
 import (
 	"go/types"
-	"os"
+	"strings"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/hybrid"
 	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/integration/awskms"
@@ -27,14 +26,6 @@ func (c *KeysetCommand) Command() *cobra.Command {
 			Usage:       "URI for a remote key-encryption-key (KEK) used to encrypt Tink keyset",
 			OptType:     types.String,
 			ConfigKey:   &c.RemoteKEKURI,
-			FlagDefault: "",
-			Required:    false,
-		},
-		{
-			Name:        "output-filepath",
-			Usage:       "File path to which the keyset is written",
-			OptType:     types.String,
-			ConfigKey:   &c.OutputFilePath,
 			FlagDefault: "",
 			Required:    false,
 		},
@@ -70,8 +61,10 @@ func (c *KeysetCommand) Create() {
 		return
 	}
 
-	memKeyset := &keyset.MemReaderWriter{}
-	ksPriv := []byte{}
+	keysetPrivateEncrypted := strings.Builder{}
+	keysetPrivateCleartext := strings.Builder{}
+	keysetPublic := strings.Builder{}
+
 	if c.RemoteKEKURI != "" {
 		kmsClient, err := awskms.NewClient(c.RemoteKEKURI)
 		if err != nil {
@@ -85,48 +78,34 @@ func (c *KeysetCommand) Create() {
 			return
 		}
 
-		err = khPriv.Write(memKeyset, aead)
+		err = khPriv.Write(keyset.NewJSONWriter(&keysetPrivateEncrypted), aead)
 		if err != nil {
-			c.Logger.Errorf("Error writing encrypted keyset: %s", err.Error())
-			return
-		}
-
-		ksPriv, err = proto.Marshal(memKeyset.EncryptedKeyset)
-		if err != nil {
-			c.Logger.Errorf("Error serializing encrypted keyset: %s", err.Error())
-			return
-		}
-	} else {
-		err = insecurecleartextkeyset.Write(khPriv, memKeyset)
-		if err != nil {
-			c.Logger.Errorf("Error writing cleartext keyset: %s", err.Error())
-			return
-		}
-
-		ksPriv, err = proto.Marshal(memKeyset.Keyset)
-		if err != nil {
-			c.Logger.Errorf("Error serializing cleartext keyset: %s", err.Error())
+			c.Logger.Errorf("Error writing encrypted keyset containing private key: %s", err.Error())
 			return
 		}
 	}
 
-	filePath := "keyset.cfg"
-	if c.OutputFilePath != "" {
-		filePath = c.OutputFilePath
-	}
-
-	f, err := os.OpenFile(filePath, os.O_EXCL|os.O_CREATE|os.O_WRONLY, 0644)
+	err = insecurecleartextkeyset.Write(khPriv, keyset.NewJSONWriter(&keysetPrivateCleartext))
 	if err != nil {
-		c.Logger.Errorf("Error opening output file: %s", err.Error())
-		return
-	}
-	defer f.Close()
-
-	_, err = f.Write(ksPriv)
-	if err != nil {
-		c.Logger.Errorf("Error writing to output file: %s", err.Error())
+		c.Logger.Errorf("Error writing cleartext keyset containing private key: %s", err.Error())
 		return
 	}
 
-	c.Logger.Info("Tink keyset has been written to a file. The default file name is 'keyset.cfg'.")
+	khPub, err := khPriv.Public()
+	if err != nil {
+		c.Logger.Errorf("Error getting keyhandle for public key: %s", err.Error())
+		return
+	}
+
+	err = khPub.WriteWithNoSecrets(keyset.NewJSONWriter(&keysetPublic))
+	if err != nil {
+		c.Logger.Errorf("Error writing cleartext keyset containing public key: %s", err.Error())
+		return
+	}
+
+	c.Logger.Print("Cleartext keyset public:", keysetPublic.String())
+	c.Logger.Print("Cleartext keyset private:", keysetPrivateCleartext.String())
+	if c.RemoteKEKURI != "" {
+		c.Logger.Print("Encrypted keyset private:", keysetPrivateEncrypted.String())
+	}
 }
