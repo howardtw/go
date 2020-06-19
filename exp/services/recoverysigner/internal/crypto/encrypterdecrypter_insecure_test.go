@@ -9,32 +9,32 @@ import (
 
 func TestNewInsecureEncrypterDecrypter(t *testing.T) {
 	ksPriv := generateHybridKeysetCleartext(t)
-	ied, err := newInsecureEncrypterDecrypter(ksPriv)
+	enc, dec, err := newInsecureEncrypterDecrypter(ksPriv)
 	require.NoError(t, err)
-	assert.NotNil(t, ied)
-	assert.NotNil(t, ied.hybridEncrypt)
-	assert.NotNil(t, ied.hybridDecrypt)
+	assert.NotNil(t, enc)
+	assert.NotNil(t, dec)
 
-	ied, err = newInsecureEncrypterDecrypter("")
+	enc, dec, err = newInsecureEncrypterDecrypter("")
 	assert.Error(t, err)
-	assert.Nil(t, ied)
+	assert.Nil(t, enc)
+	assert.Nil(t, dec)
 }
 
 func TestInsecureEncrypterDecrypter_encryptDecrypt(t *testing.T) {
 	ksPriv := generateHybridKeysetCleartext(t)
-	ied, err := newInsecureEncrypterDecrypter(ksPriv)
+	enc, dec, err := newInsecureEncrypterDecrypter(ksPriv)
 	require.NoError(t, err)
 
 	plaintext := []byte("secure message")
 	contextInfo := []byte("context info")
-	ciphertext, err := ied.Encrypt(plaintext, contextInfo)
+	ciphertext, err := enc.Encrypt(plaintext, contextInfo)
 	require.NoError(t, err)
 
-	plaintext2, err := ied.Decrypt(ciphertext, contextInfo)
+	plaintext2, err := dec.Decrypt(ciphertext, contextInfo)
 	require.NoError(t, err)
 	assert.Equal(t, plaintext, plaintext2)
 
 	// context info not matching will result in a failed decryption
-	_, err = ied.Decrypt(ciphertext, []byte("wrong info"))
+	_, err = dec.Decrypt(ciphertext, []byte("wrong info"))
 	assert.Error(t, err)
 }

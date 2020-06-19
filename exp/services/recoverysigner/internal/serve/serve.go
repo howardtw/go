@@ -105,19 +105,9 @@ func getHandlerDeps(opts Options) (handlerDeps, error) {
 	}
 	opts.Logger.Infof("SEP10 JWKS contains %d keys", len(sep10JWKS.Keys))
 
-	ed, err := crypto.NewEncrypterDecrypter(opts.EncryptionKMSKeyURI, opts.EncryptionTinkKeysetJSON)
+	encrypter, decrypter, err := crypto.NewEncrypterDecrypter(opts.EncryptionKMSKeyURI, opts.EncryptionTinkKeysetJSON)
 	if err != nil {
 		return handlerDeps{}, errors.Wrap(err, "error initializing EncrypterDecrypter")
-	}
-
-	encrypter, ok := ed.(crypto.Encrypter)
-	if !ok {
-		return handlerDeps{}, errors.New("EncrypterDecrypter is not an encrypter")
-	}
-
-	decrypter, ok := ed.(crypto.Decrypter)
-	if !ok {
-		return handlerDeps{}, errors.New("EncrypterDecrypter a decrypter")
 	}
 
 	db, err := db.Open(opts.DatabaseURL)
