@@ -11,19 +11,9 @@ import (
 	"github.com/stellar/go/support/errors"
 )
 
-var _ tink.AEAD = (*SecureEncrypterDecrypter)(nil)
-var _ tink.HybridEncrypt = (*SecureEncrypterDecrypter)(nil)
-var _ tink.HybridDecrypt = (*SecureEncrypterDecrypter)(nil)
-
-type SecureEncrypterDecrypter struct {
-	remote        tink.AEAD
-	keyset        *tinkpb.EncryptedKeyset
-	hybridEncrypt tink.HybridEncrypt
-}
-
 // kmsKeyURI must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
 // See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
-func newSecureEncrypterDecrypter(client registry.KMSClient, kmsKeyURI, tinkKeysetJSON string) (*SecureEncrypterDecrypter, error) {
+func newSecureEncrypterDecrypter(client registry.KMSClient, kmsKeyURI, tinkKeysetJSON string) (Encrypter, Decrypter, error) {
 	// The registration of the KMS client is only necessary if we want to
 	// use KMSEnvelopeAEAD. In other words, this is not required since we
 	// are not using envelope encryption to encrypt/decrypt the Tink
@@ -33,42 +23,44 @@ func newSecureEncrypterDecrypter(client registry.KMSClient, kmsKeyURI, tinkKeyse
 
 	aead, err := client.GetAEAD(kmsKeyURI)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting AEAD primitive from KMS")
+		return nil, nil, errors.Wrap(err, "getting AEAD primitive from KMS")
 	}
 
 	khPriv, err := keyset.Read(keyset.NewJSONReader(strings.NewReader(tinkKeysetJSON)), aead)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting key handle for private key")
+		return nil, nil, errors.Wrap(err, "getting key handle for private key")
 	}
 
 	memKeyset := &keyset.MemReaderWriter{}
 	err = khPriv.Write(memKeyset, aead)
 	if err != nil {
-		return nil, errors.Wrap(err, "encrypting keyset")
+		return nil, nil, errors.Wrap(err, "encrypting keyset")
+	}
+
+	d := &secureDecrypter{
+		remote: aead,
+		keyset: memKeyset.EncryptedKeyset,
 	}
 
 	khPub, err := khPriv.Public()
 	if err != nil {
-		return nil, errors.Wrap(err, "getting key handle for public key")
+		return nil, nil, errors.Wrap(err, "getting key handle for public key")
 	}
 
 	he, err := hybrid.NewHybridEncrypt(khPub)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting hybrid encryption primitive")
+		return nil, nil, errors.Wrap(err, "getting hybrid encryption primitive")
 	}
 
-	return &SecureEncrypterDecrypter{
-		remote:        aead,
-		keyset:        memKeyset.EncryptedKeyset,
-		hybridEncrypt: he,
-	}, nil
+	return he, d, nil
 }
 
-func (ks *SecureEncrypterDecrypter) Encrypt(plaintext, contextInfo []byte) ([]byte, error) {
-	return ks.hybridEncrypt.Encrypt(plaintext, contextInfo)
+type secureDecrypter struct {
+	remote tink.AEAD
+	keyset *tinkpb.EncryptedKeyset
 }
 
-func (ks *SecureEncrypterDecrypter) Decrypt(ciphertext, contextInfo []byte) ([]byte, error) {
+func (ks *secureDecrypter) Decrypt(ciphertext, contextInfo []byte) ([]byte, error) {
 	khPriv, err := keyset.Read(&keyset.MemReaderWriter{EncryptedKeyset: ks.keyset}, ks.remote)
 	if err != nil {
 		return nil, errors.Wrap(err, "decrypting keyset")

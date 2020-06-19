@@ -9,7 +9,8 @@ import (
 
 func TestNewEncrypterDecrypter(t *testing.T) {
 	ksPriv := generateHybridKeysetCleartext(t)
-	srvKey, err := NewEncrypterDecrypter("", ksPriv)
+	enc, dec, err := NewEncrypterDecrypter("", ksPriv)
 	require.NoError(t, err)
-	assert.IsType(t, (*InsecureEncrypterDecrypter)(nil), srvKey)
+	assert.NotNil(t, enc)
+	assert.NotNil(t, dec)
 }

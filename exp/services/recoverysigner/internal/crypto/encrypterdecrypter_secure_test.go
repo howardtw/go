@@ -9,33 +9,32 @@ import (
 
 func TestNewSecureEncrypterDecrypter(t *testing.T) {
 	ksPriv := generateHybridKeysetEncrypted(t)
-	sed, err := newSecureEncrypterDecrypter(mockKMSClient{}, "aws-kms://key-uri", ksPriv)
+	enc, dec, err := newSecureEncrypterDecrypter(mockKMSClient{}, "aws-kms://key-uri", ksPriv)
 	require.NoError(t, err)
-	assert.NotNil(t, sed)
-	assert.NotNil(t, sed.remote)
-	assert.NotNil(t, sed.keyset)
-	assert.NotNil(t, sed.hybridEncrypt)
+	assert.NotNil(t, enc)
+	assert.NotNil(t, dec)
 
-	sed, err = newSecureEncrypterDecrypter(mockKMSClient{}, "mock-key-uri", "")
+	enc, dec, err = newSecureEncrypterDecrypter(mockKMSClient{}, "mock-key-uri", "")
 	assert.Error(t, err)
-	assert.Nil(t, sed)
+	assert.Nil(t, enc)
+	assert.Nil(t, dec)
 }
 
 func TestSecureEncrypterDecrypter_encryptDecrypt(t *testing.T) {
 	ksPriv := generateHybridKeysetEncrypted(t)
-	sed, err := newSecureEncrypterDecrypter(mockKMSClient{}, "mock-key-uri", ksPriv)
+	enc, dec, err := newSecureEncrypterDecrypter(mockKMSClient{}, "mock-key-uri", ksPriv)
 	require.NoError(t, err)
 
 	plaintext := []byte("secure message")
 	contextInfo := []byte("context info")
-	ciphertext, err := sed.Encrypt(plaintext, contextInfo)
+	ciphertext, err := enc.Encrypt(plaintext, contextInfo)
 	require.NoError(t, err)
 
-	plaintext2, err := sed.Decrypt(ciphertext, contextInfo)
+	plaintext2, err := dec.Decrypt(ciphertext, contextInfo)
 	require.NoError(t, err)
 	assert.Equal(t, plaintext, plaintext2)
 
 	// context info not matching will result in a failed decryption
-	_, err = sed.Decrypt(ciphertext, []byte("wrong info"))
+	_, err = dec.Decrypt(ciphertext, []byte("wrong info"))
 	assert.Error(t, err)
 }
