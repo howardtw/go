@@ -10,16 +10,16 @@ import (
 	"github.com/stellar/go/support/errors"
 )
 
-var _ tink.AEAD = (*InsecureServiceKey)(nil)
-var _ tink.HybridEncrypt = (*InsecureServiceKey)(nil)
-var _ tink.HybridDecrypt = (*InsecureServiceKey)(nil)
+var _ tink.AEAD = (*InsecureEncrypterDecrypter)(nil)
+var _ tink.HybridEncrypt = (*InsecureEncrypterDecrypter)(nil)
+var _ tink.HybridDecrypt = (*InsecureEncrypterDecrypter)(nil)
 
-type InsecureServiceKey struct {
+type InsecureEncrypterDecrypter struct {
 	hybridEncrypt tink.HybridEncrypt
 	hybridDecrypt tink.HybridDecrypt
 }
 
-func newInsecureServiceKey(tinkKeysetJSON string) (*InsecureServiceKey, error) {
+func newInsecureEncrypterDecrypter(tinkKeysetJSON string) (*InsecureEncrypterDecrypter, error) {
 	khPriv, err := insecurecleartextkeyset.Read(keyset.NewJSONReader(strings.NewReader(tinkKeysetJSON)))
 	if err != nil {
 		return nil, errors.Wrap(err, "getting key handle for private key")
@@ -40,16 +40,16 @@ func newInsecureServiceKey(tinkKeysetJSON string) (*InsecureServiceKey, error) {
 		return nil, errors.Wrap(err, "getting hybrid encryption primitive")
 	}
 
-	return &InsecureServiceKey{
+	return &InsecureEncrypterDecrypter{
 		hybridEncrypt: he,
 		hybridDecrypt: hd,
 	}, nil
 }
 
-func (ks *InsecureServiceKey) Encrypt(plaintext, contextInfo []byte) ([]byte, error) {
+func (ks *InsecureEncrypterDecrypter) Encrypt(plaintext, contextInfo []byte) ([]byte, error) {
 	return ks.hybridEncrypt.Encrypt(plaintext, contextInfo)
 }
 
-func (ks *InsecureServiceKey) Decrypt(ciphertext, contextInfo []byte) ([]byte, error) {
+func (ks *InsecureEncrypterDecrypter) Decrypt(ciphertext, contextInfo []byte) ([]byte, error) {
 	return ks.hybridDecrypt.Decrypt(ciphertext, contextInfo)
 }

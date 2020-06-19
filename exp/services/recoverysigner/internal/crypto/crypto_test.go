@@ -7,9 +7,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewServiceKey(t *testing.T) {
+func TestNewEncrypterDecrypter(t *testing.T) {
 	ksPriv := generateHybridKeysetCleartext(t)
-	srvKey, err := NewServiceKey("", ksPriv)
+	srvKey, err := NewEncrypterDecrypter("", ksPriv)
 	require.NoError(t, err)
-	assert.IsType(t, (*InsecureServiceKey)(nil), srvKey)
+	assert.IsType(t, (*InsecureEncrypterDecrypter)(nil), srvKey)
 }

@@ -15,9 +15,9 @@ type Decrypter interface {
 	Decrypt(ciphertext, contextInfo []byte) (plaintext []byte, err error)
 }
 
-func NewServiceKey(kmsKeyURI, tinkKeysetJSON string) (interface{}, error) {
+func NewEncrypterDecrypter(kmsKeyURI, tinkKeysetJSON string) (interface{}, error) {
 	if len(kmsKeyURI) == 0 {
-		return newInsecureServiceKey(tinkKeysetJSON)
+		return newInsecureEncrypterDecrypter(tinkKeysetJSON)
 	}
 
 	if len(kmsKeyURI) <= 7 {
@@ -32,9 +32,9 @@ func NewServiceKey(kmsKeyURI, tinkKeysetJSON string) (interface{}, error) {
 			return nil, errors.Wrap(err, "initializing AWS KMS client")
 		}
 
-		return newSecureServiceKey(kmsClient, kmsKeyURI, tinkKeysetJSON)
+		return newSecureEncrypterDecrypter(kmsClient, kmsKeyURI, tinkKeysetJSON)
 
 	default:
-		return nil, errors.New("unrecognized prefix in remote KEK URI")
+		return nil, errors.New("unrecognized prefix in KMS Key URI")
 	}
 }
