@@ -1,7 +1,6 @@
 package crypto
 
 import (
-	"bytes"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,7 +9,7 @@ import (
 
 func TestNewServiceKey(t *testing.T) {
 	ksPriv := generateHybridKeysetCleartext(t)
-	srvKey, err := NewServiceKey("", bytes.NewReader(ksPriv))
+	srvKey, err := NewServiceKey("", ksPriv)
 	require.NoError(t, err)
 	assert.IsType(t, (*InsecureServiceKey)(nil), srvKey)
 }

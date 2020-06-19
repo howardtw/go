@@ -16,7 +16,7 @@ func TestNewSecureServiceKey(t *testing.T) {
 	assert.NotNil(t, serviceKey.keyset)
 	assert.NotNil(t, serviceKey.hybridEncrypt)
 
-	serviceKey, err = newSecureServiceKey(mockKMSClient{}, "mock-key-uri", []byte(""))
+	serviceKey, err = newSecureServiceKey(mockKMSClient{}, "mock-key-uri", "")
 	assert.Error(t, err)
 	assert.Nil(t, serviceKey)
 }

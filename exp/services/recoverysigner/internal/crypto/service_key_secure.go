@@ -1,7 +1,7 @@
 package crypto
 
 import (
-	"bytes"
+	"strings"
 
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/hybrid"
@@ -21,10 +21,10 @@ type SecureServiceKey struct {
 	hybridEncrypt tink.HybridEncrypt
 }
 
-// remoteKEKURI must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
+// kmsKeyURI must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
 // See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
-func newSecureServiceKey(client registry.KMSClient, remoteKEKURI string, encryptedTinkKeyset []byte) (*SecureServiceKey, error) {
-	if len(encryptedTinkKeyset) == 0 {
+func newSecureServiceKey(client registry.KMSClient, kmsKeyURI, tinkKeysetJSON string) (*SecureServiceKey, error) {
+	if len(tinkKeysetJSON) == 0 {
 		return nil, errors.New("no keyset is present")
 	}
 
@@ -35,12 +35,12 @@ func newSecureServiceKey(client registry.KMSClient, remoteKEKURI string, encrypt
 	// case we change the strategy.
 	registry.RegisterKMSClient(client)
 
-	aead, err := client.GetAEAD(remoteKEKURI)
+	aead, err := client.GetAEAD(kmsKeyURI)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting AEAD primitive from KMS")
 	}
 
-	khPriv, err := keyset.Read(keyset.NewBinaryReader(bytes.NewReader(encryptedTinkKeyset)), aead)
+	khPriv, err := keyset.Read(keyset.NewJSONReader(strings.NewReader(tinkKeysetJSON)), aead)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting key handle for private key")
 	}

@@ -1,9 +1,6 @@
 package crypto
 
 import (
-	"io"
-	"io/ioutil"
-
 	"github.com/google/tink/go/integration/awskms"
 	"github.com/stellar/go/support/errors"
 )
@@ -18,29 +15,24 @@ type Decrypter interface {
 	Decrypt(ciphertext, contextInfo []byte) (plaintext []byte, err error)
 }
 
-func NewServiceKey(remoteKEKURI string, keysetReader io.Reader) (interface{}, error) {
-	tinkKeyset, err := ioutil.ReadAll(keysetReader)
-	if err != nil {
-		return nil, errors.Wrap(err, "reading keyset from the file path")
+func NewServiceKey(kmsKeyURI, tinkKeysetJSON string) (interface{}, error) {
+	if len(kmsKeyURI) == 0 {
+		return newInsecureServiceKey(tinkKeysetJSON)
 	}
 
-	if len(remoteKEKURI) == 0 {
-		return newInsecureServiceKey(tinkKeyset)
+	if len(kmsKeyURI) <= 7 {
+		return nil, errors.New("invalid KMS key URI format")
 	}
 
-	if len(remoteKEKURI) <= 7 {
-		return nil, errors.New("invalid remote KEK URI format")
-	}
-
-	prefix := remoteKEKURI[0:7]
+	prefix := kmsKeyURI[0:7]
 	switch prefix {
 	case awsPrefix:
-		kmsClient, err := awskms.NewClient(remoteKEKURI)
+		kmsClient, err := awskms.NewClient(kmsKeyURI)
 		if err != nil {
 			return nil, errors.Wrap(err, "initializing AWS KMS client")
 		}
 
-		return newSecureServiceKey(kmsClient, remoteKEKURI, tinkKeyset)
+		return newSecureServiceKey(kmsClient, kmsKeyURI, tinkKeysetJSON)
 
 	default:
 		return nil, errors.New("unrecognized prefix in remote KEK URI")
