@@ -20,10 +20,6 @@ type InsecureServiceKey struct {
 }
 
 func newInsecureServiceKey(tinkKeysetJSON string) (*InsecureServiceKey, error) {
-	if len(tinkKeysetJSON) == 0 {
-		return nil, errors.New("no keyset is present")
-	}
-
 	khPriv, err := insecurecleartextkeyset.Read(keyset.NewJSONReader(strings.NewReader(tinkKeysetJSON)))
 	if err != nil {
 		return nil, errors.Wrap(err, "getting key handle for private key")

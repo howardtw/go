@@ -24,10 +24,6 @@ type SecureServiceKey struct {
 // kmsKeyURI must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
 // See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
 func newSecureServiceKey(client registry.KMSClient, kmsKeyURI, tinkKeysetJSON string) (*SecureServiceKey, error) {
-	if len(tinkKeysetJSON) == 0 {
-		return nil, errors.New("no keyset is present")
-	}
-
 	// The registration of the KMS client is only necessary if we want to
 	// use KMSEnvelopeAEAD. In other words, this is not required since we
 	// are not using envelope encryption to encrypt/decrypt the Tink
