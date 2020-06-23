@@ -14,13 +14,6 @@ import (
 // kmsKeyURI must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
 // See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
 func newSecureEncrypterDecrypter(client registry.KMSClient, kmsKeyURI, tinkKeysetJSON string) (Encrypter, Decrypter, error) {
-	// The registration of the KMS client is only necessary if we want to
-	// use KMSEnvelopeAEAD. In other words, this is not required since we
-	// are not using envelope encryption to encrypt/decrypt the Tink
-	// keyset. However, it doesn't hurt to leave it here to be defensive in
-	// case we change the strategy.
-	registry.RegisterKMSClient(client)
-
 	aead, err := client.GetAEAD(kmsKeyURI)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "getting AEAD primitive from KMS")
