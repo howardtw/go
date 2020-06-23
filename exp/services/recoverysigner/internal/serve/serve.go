@@ -107,7 +107,7 @@ func getHandlerDeps(opts Options) (handlerDeps, error) {
 
 	encrypter, decrypter, err := crypto.NewEncrypterDecrypter(opts.EncryptionKMSKeyURI, opts.EncryptionTinkKeysetJSON)
 	if err != nil {
-		return handlerDeps{}, errors.Wrap(err, "error initializing EncrypterDecrypter")
+		return handlerDeps{}, errors.Wrap(err, "initializing encrypter decrypter")
 	}
 
 	db, err := db.Open(opts.DatabaseURL)
