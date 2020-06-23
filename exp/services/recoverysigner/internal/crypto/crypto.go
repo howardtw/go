@@ -3,6 +3,7 @@ package crypto
 import (
 	"github.com/google/tink/go/integration/awskms"
 	"github.com/stellar/go/support/errors"
+	supportlog "github.com/stellar/go/support/log"
 )
 
 const awsPrefix = "aws-kms"
@@ -15,9 +16,9 @@ type Decrypter interface {
 	Decrypt(ciphertext, contextInfo []byte) (plaintext []byte, err error)
 }
 
-func NewEncrypterDecrypter(kmsKeyURI, tinkKeysetJSON string) (Encrypter, Decrypter, error) {
+func NewEncrypterDecrypter(l *supportlog.Entry, kmsKeyURI, tinkKeysetPrivateJSON, tinkKeysetPublicJSON string) (Encrypter, Decrypter, error) {
 	if len(kmsKeyURI) == 0 {
-		return newInsecureEncrypterDecrypter(tinkKeysetJSON)
+		return newInsecureEncrypterDecrypter(l, tinkKeysetPrivateJSON, tinkKeysetPublicJSON)
 	}
 
 	if len(kmsKeyURI) <= 7 {
@@ -32,7 +33,7 @@ func NewEncrypterDecrypter(kmsKeyURI, tinkKeysetJSON string) (Encrypter, Decrypt
 			return nil, nil, errors.Wrap(err, "initializing AWS KMS client")
 		}
 
-		return newSecureEncrypterDecrypter(kmsClient, kmsKeyURI, tinkKeysetJSON)
+		return newSecureEncrypterDecrypter(kmsClient, kmsKeyURI, tinkKeysetPrivateJSON)
 
 	default:
 		return nil, nil, errors.New("unrecognized prefix in KMS Key URI")
