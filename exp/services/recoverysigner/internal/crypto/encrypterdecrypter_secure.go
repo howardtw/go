@@ -19,20 +19,17 @@ func newSecureEncrypterDecrypter(client registry.KMSClient, kmsKeyURI, tinkKeyse
 		return nil, nil, errors.Wrap(err, "getting AEAD primitive from KMS")
 	}
 
-	khPriv, err := keyset.Read(keyset.NewJSONReader(strings.NewReader(tinkKeysetJSON)), aead)
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "getting key handle for private key")
-	}
-
-	memKeyset := &keyset.MemReaderWriter{}
-	err = khPriv.Write(memKeyset, aead)
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "encrypting keyset")
-	}
+	ksr := keyset.NewJSONReader(strings.NewReader(tinkKeysetJSON))
+	ks, err := ksr.ReadEncrypted()
 
 	d := &secureDecrypter{
 		remote: aead,
-		keyset: memKeyset.EncryptedKeyset,
+		keyset: ks,
+	}
+
+	khPriv, err := keyset.Read(&keyset.MemReaderWriter{EncryptedKeyset: ks}, aead)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "getting key handle for private key")
 	}
 
 	khPub, err := khPriv.Public()
