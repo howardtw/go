@@ -14,7 +14,15 @@ func TestNewInsecureEncrypterDecrypter(t *testing.T) {
 	assert.NotNil(t, enc)
 	assert.NotNil(t, dec)
 
+	// no keyset is present
 	enc, dec, err = newInsecureEncrypterDecrypter("")
+	assert.Error(t, err)
+	assert.Nil(t, enc)
+	assert.Nil(t, dec)
+
+	// encrypted keyset is preset
+	ksPrivEncrypted := generateHybridKeysetEncrypted(t)
+	enc, dec, err = newInsecureEncrypterDecrypter(ksPrivEncrypted)
 	assert.Error(t, err)
 	assert.Nil(t, enc)
 	assert.Nil(t, dec)
