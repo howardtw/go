@@ -33,7 +33,7 @@ func NewEncrypterDecrypter(l *supportlog.Entry, kmsKeyURI, tinkKeysetPrivateJSON
 			return nil, nil, errors.Wrap(err, "initializing AWS KMS client")
 		}
 
-		return newSecureEncrypterDecrypter(kmsClient, kmsKeyURI, tinkKeysetPrivateJSON)
+		return newSecureEncrypterDecrypter(l, kmsClient, kmsKeyURI, tinkKeysetPrivateJSON, tinkKeysetPublicJSON)
 
 	default:
 		return nil, nil, errors.New("unrecognized prefix in KMS Key URI")
