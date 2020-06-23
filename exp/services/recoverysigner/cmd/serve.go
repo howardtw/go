@@ -97,7 +97,7 @@ func (c *ServeCommand) Command() *cobra.Command {
 		},
 		{
 			Name:        "encryption-tink-keyset-private",
-			Usage:       "Tink keyset in JSON format containing a single asymmetric key used to decrypt signing keys (the keyset must be encrypted by the remote KMS key specified in encryption-kms-key-uri if that option is present)",
+			Usage:       "Tink keyset in JSON format containing a single asymmetric key used to encrypt/decrypt signing keys (the keyset must be encrypted by the remote KMS key specified in encryption-kms-key-uri if that option is present)",
 			OptType:     types.String,
 			ConfigKey:   &opts.EncryptionTinkKeysetPrivateJSON,
 			FlagDefault: "",
