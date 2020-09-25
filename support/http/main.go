@@ -22,19 +22,17 @@ import (
 // on a `Config` struct.
 const defaultListenAddr = "0.0.0.0:8080"
 
-const (
-	// defaultShutdownGracePeriod represents the default time in which the running
-	// process will allow outstanding http requests to complete before aborting
-	// them.  It will be used when a grace period of 0 is used, which normally
-	// signifies "no timeout" to our graceful shutdown package.  We choose not to
-	// provide a "no timeout" mode at present.  Feel free to set the value to a year
-	// or something if you need a timeout that is effectively "no timeout"; We
-	// believe that most servers should use a sane timeout and prefer one for the
-	// default configuration.
-	defaultShutdownGracePeriod = 10 * time.Second
+// defaultShutdownGracePeriod represents the default time in which the running
+// process will allow outstanding http requests to complete before aborting
+// them.  It will be used when a grace period of 0 is used, which normally
+// signifies "no timeout" to our graceful shutdown package.  We choose not to
+// provide a "no timeout" mode at present.  Feel free to set the value to a year
+// or something if you need a timeout that is effectively "no timeout"; We
+// believe that most servers should use a sane timeout and prefer one for the
+// default configuration.
+const defaultShutdownGracePeriod = 10 * time.Second
 
-	defaultReadTimeout = 5 * time.Second
-)
+const defaultReadTimeout = 5 * time.Second
 
 // SimpleHTTPClientInterface helps mocking http.Client in tests
 type SimpleHTTPClientInterface interface {
@@ -99,11 +97,11 @@ func setup(conf Config) *graceful.Server {
 		conf.ListenAddr = defaultListenAddr
 	}
 
-	if conf.ShutdownGracePeriod == 0 {
+	if conf.ShutdownGracePeriod == time.Duration(0) {
 		conf.ShutdownGracePeriod = defaultShutdownGracePeriod
 	}
 
-	if conf.ReadTimeout == 0 {
+	if conf.ReadTimeout == time.Duration(0) {
 		conf.ReadTimeout = defaultReadTimeout
 	}
 
