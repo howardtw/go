@@ -21,6 +21,7 @@ func TestRun_setup(t *testing.T) {
 		Handler: stdhttp.NotFoundHandler(),
 	})
 
-	assert.Equal(t, DefaultShutdownGracePeriod, srv.Timeout)
-	assert.Equal(t, DefaultListenAddr, srv.Server.Addr)
+	assert.Equal(t, defaultShutdownGracePeriod, srv.Timeout)
+	assert.Equal(t, defaultReadTimeout, srv.ReadTimeout)
+	assert.Equal(t, defaultListenAddr, srv.Server.Addr)
 }
