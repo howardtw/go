@@ -7,7 +7,7 @@ file.  This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Add
 
-- Add `IsTimeoutError`
+- Add `IsTimeoutError`.
 
 ## [v7.0.0](https://github.com/stellar/go/releases/tag/horizonclient-v7.0.0) - 2021-05-15
 
@@ -69,7 +69,7 @@ Added new client methods and effects supporting [Protocol 14](https://github.com
 
 ### Add
 
-- Add `IsNotFoundError`
+- Add `IsNotFoundError`.
 - Add `client.SubmitFeeBumpTransaction` and `client.SubmitFeeBumpTransactionWithOptions` for submitting [fee bump transactions](https://github.com/stellar/stellar-protocol/blob/master/core/cap-0015.md). Note that fee bump transactions will only be accepted by Stellar Core once Protocol 13 is enabled.
 
 ### Updates
