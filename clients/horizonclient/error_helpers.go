@@ -23,6 +23,26 @@ func IsNotFoundError(err error) bool {
 	return hErr.Problem.Type == "https://stellar.org/horizon-errors/not_found"
 }
 
+// IsTimeoutError returns true if the error is a horizonclient.Error with
+// a timeout problem indicating that Horizon timed out.
+func IsTimeoutError(err error) bool {
+	var hErr *Error
+
+	err = errors.Cause(err)
+	switch err := err.(type) {
+	case *Error:
+		hErr = err
+	case Error:
+		hErr = &err
+	}
+
+	if hErr == nil {
+		return false
+	}
+
+	return hErr.Problem.Type == "https://stellar.org/horizon-errors/timeout"
+}
+
 // GetError returns an error that can be interpreted as a horizon-specific
 // error. If err cannot be interpreted as a horizon-specific error, a nil error
 // is returned. The caller should still check whether err is nil.
