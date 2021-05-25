@@ -18,9 +18,9 @@ func IsNotFoundError(err error) bool {
 	return hErr.Problem.Type == "https://stellar.org/horizon-errors/not_found"
 }
 
-// IsTimeoutError returns true if the error is a horizonclient.Error with
+// IsHorizonAPITimeoutError returns true if the error is a horizonclient.Error with
 // a timeout problem indicating that Horizon timed out.
-func IsTimeoutError(err error) bool {
+func IsHorizonAPITimeoutError(err error) bool {
 	hErr := GetError(err)
 	if hErr == nil {
 		return false

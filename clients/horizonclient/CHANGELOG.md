@@ -7,7 +7,7 @@ file.  This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Add
 
-- Add `IsTimeoutError`.
+- Add `IsHorizonAPITimeoutError` - returns whether an error indicating Horizon API has timed out.
 
 ## [v7.0.0](https://github.com/stellar/go/releases/tag/horizonclient-v7.0.0) - 2021-05-15
 

@@ -127,7 +127,7 @@ func TestIsNotFoundError(t *testing.T) {
 	}
 }
 
-func TestIsTimeoutError(t *testing.T) {
+func TestIsHorizonAPITimeoutError(t *testing.T) {
 	testCases := []struct {
 		desc string
 		err  error
@@ -240,7 +240,7 @@ func TestIsTimeoutError(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			is := IsTimeoutError(tc.err)
+			is := IsHorizonAPITimeoutError(tc.err)
 			assert.Equal(t, tc.is, is)
 		})
 	}
