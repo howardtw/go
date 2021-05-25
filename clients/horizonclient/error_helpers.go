@@ -1,6 +1,10 @@
 package horizonclient
 
-import "github.com/stellar/go/support/errors"
+import (
+	"net/http"
+
+	"github.com/stellar/go/support/errors"
+)
 
 // IsNotFoundError returns true if the error is a horizonclient.Error with
 // a not_found problem indicating that the resource is not found on
@@ -22,7 +26,7 @@ func IsTimeoutError(err error) bool {
 		return false
 	}
 
-	return hErr.Problem.Type == "https://stellar.org/horizon-errors/timeout"
+	return hErr.Problem.Status == http.StatusGatewayTimeout
 }
 
 // GetError returns an error that can be interpreted as a horizon-specific
