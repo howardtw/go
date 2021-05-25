@@ -6,16 +6,7 @@ import "github.com/stellar/go/support/errors"
 // a not_found problem indicating that the resource is not found on
 // Horizon.
 func IsNotFoundError(err error) bool {
-	var hErr *Error
-
-	err = errors.Cause(err)
-	switch err := err.(type) {
-	case *Error:
-		hErr = err
-	case Error:
-		hErr = &err
-	}
-
+	hErr := GetError(err)
 	if hErr == nil {
 		return false
 	}
@@ -26,16 +17,7 @@ func IsNotFoundError(err error) bool {
 // IsTimeoutError returns true if the error is a horizonclient.Error with
 // a timeout problem indicating that Horizon timed out.
 func IsTimeoutError(err error) bool {
-	var hErr *Error
-
-	err = errors.Cause(err)
-	switch err := err.(type) {
-	case *Error:
-		hErr = err
-	case Error:
-		hErr = &err
-	}
-
+	hErr := GetError(err)
 	if hErr == nil {
 		return false
 	}
