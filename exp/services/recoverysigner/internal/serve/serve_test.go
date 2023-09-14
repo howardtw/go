@@ -18,8 +18,7 @@ func TestGetHandlerDeps(t *testing.T) {
 	opts := Options{
 		Logger:      supportlog.DefaultLogger,
 		SigningKeys: signingKey,
-		SEP10JWKS: `{"keys":[{"kty":"EC","crv":"P-256","alg":"ES256",` +
-			`"x":"i8chX_7Slm4VQ_Y6XBWVBnxIO5-XSWH1GJsXWNkal3E","y":"G22r0OgrcQnkfCAqsS6wvtHgR0SbfvXNJy6-jJfvc94"}]}`,
+		SEP10JWKS:   `{"keys":[{"kty":"EC","crv":"P-256","alg":"ES256","x":"i8chX_7Slm4VQ_Y6XBWVBnxIO5-XSWH1GJsXWNkal3E","y":"G22r0OgrcQnkfCAqsS6wvtHgR0SbfvXNJy6-jJfvc94"}]}`,
 	}
 
 	sep10JWKS := jose.JSONWebKeySet{}
